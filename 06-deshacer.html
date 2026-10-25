@@ -95,7 +95,7 @@
       <div class="card">
         <h3>Descartar modificaciones</h3>
         <div class="cmd"><pre><code>git restore app.js</code></pre><div class="what">Devuelve <code>app.js</code> a como estaba en el último commit. Lo que habías cambiado se pierde.</div></div>
-        <div class="cmd"><pre><code>git restore .</code></pre><div class="what">Lo mismo para todos los archivos modificados de la carpeta.</div></div>
+        <div class="cmd"><pre><code>git restore .</code></pre><div class="what">Lo mismo para todos los archivos modificados de la carpeta actual y sus subcarpetas: quedan como en el último commit. No toca los archivos nuevos que Git todavía no sigue (para esos, <code>git clean</code>).</div></div>
         <div class="callout bad"><span class="ico">✕</span><p>Lo descartado con <code>restore</code> no pasa por ninguna papelera. Si no estás seguro, primero <code>git stash</code> (lo guarda) en vez de descartarlo.</p></div>
       </div>
       <div class="card">
@@ -116,10 +116,10 @@
     <div class="grid cols-2">
       <div class="card">
         <h3>Me equivoqué en el mensaje</h3>
-        <div class="cmd"><pre><code>git commit --amend -m "Mensaje correcto"</code></pre><div class="what">Reemplaza el último commit por uno igual con el mensaje nuevo.</div></div>
+        <div class="cmd"><pre><code>git commit --amend -m "Mensaje correcto"</code></pre><div class="what">Reemplaza el último commit por uno nuevo con el mismo contenido y el mensaje corregido. Tiene otro hash: por eso solo se hace si todavía no lo subiste con <code>push</code>.</div></div>
         <h3 style="margin-top:12px">Me olvidé un archivo</h3>
         <div class="cmd"><pre><code>git add archivo-olvidado.js
-git commit --amend --no-edit</code></pre><div class="what">Suma el archivo al último commit. <code>--no-edit</code> conserva el mensaje.</div></div>
+git commit --amend --no-edit</code></pre><div class="what">Prepara el archivo que faltaba y lo suma al último commit en vez de crear uno nuevo. <code>--no-edit</code> conserva el mensaje que ya tenía. Igual que antes: solo si no hiciste <code>push</code>.</div></div>
       </div>
       <div class="card">
         <h3>Quiero “descommitear”</h3>
@@ -174,8 +174,8 @@ git commit --amend --no-edit</code></pre><div class="what">Suma el archivo al ú
     </div>
     <div class="grid cols-2" style="margin-top:16px">
       <div class="card">
-        <div class="cmd"><pre><code>git reset --soft HEAD~1</code></pre><div class="what">Deshacer commits y volver a commitear de otra forma.</div></div>
-        <div class="cmd"><pre><code>git reset HEAD~1</code></pre><div class="what">Modo mixto: deshacer commits y decidir de nuevo qué preparar.</div></div>
+        <div class="cmd"><pre><code>git reset --soft HEAD~1</code></pre><div class="what">Deshace el último commit (<code>HEAD~1</code> = “uno antes del actual”; <code>HEAD~3</code>, tres) pero deja sus cambios <b>preparados</b>, listos para volver a commitear. Sirve para juntar varios commits en uno o rehacerlo con otro mensaje.</div></div>
+        <div class="cmd"><pre><code>git reset HEAD~1</code></pre><div class="what">Modo mixto (el que se usa si no ponés <code>--soft</code> ni <code>--hard</code>): deshace el commit y deja sus cambios en los archivos, pero <b>sin preparar</b>. Así podés elegir de nuevo con <code>git add</code> qué va en cada commit.</div></div>
       </div>
       <div class="card">
         <div class="cmd"><pre><code>git reset --hard origin/main</code></pre><div class="what">Tirar todo lo local y dejar la rama exactamente como en GitHub (después de <code>git fetch</code>). ⚠ Se pierden los commits locales no subidos y los cambios sin commitear.</div></div>
@@ -193,9 +193,9 @@ git commit --amend --no-edit</code></pre><div class="what">Suma el archivo al ú
     <div class="explain"><p>Si el commit ya está en GitHub, no lo borres: otras personas (o Netlify) pueden tenerlo. <code>git revert</code> crea un commit nuevo que <b>aplica lo contrario</b>: si el original agregó una línea, el revert la quita. El historial queda completo y se ve qué se deshizo y cuándo.</p></div>
     <div class="grid cols-2">
       <div class="card">
-        <div class="cmd"><pre><code>git log --oneline</code></pre><div class="what">Buscá el hash del commit a deshacer.</div></div>
+        <div class="cmd"><pre><code>git log --oneline</code></pre><div class="what">Buscá en la lista el hash del commit que querés deshacer (la columna de la izquierda). Alcanza con copiar esos 7 caracteres.</div></div>
         <div class="cmd"><pre><code>git revert a1f3c9e</code></pre><div class="what">Crea el commit inverso. Se abre el editor con el mensaje “Revert …”: guardá y cerrá.</div></div>
-        <div class="cmd"><pre><code>git push</code></pre><div class="what">Subilo como cualquier otro commit.</div></div>
+        <div class="cmd"><pre><code>git push</code></pre><div class="what">El commit inverso es un commit más: se sube con <code>git push</code> como cualquier otro, sin reescribir el historial. Por eso <code>revert</code> es la forma segura de deshacer algo que ya está en GitHub.</div></div>
       </div>
       <div class="card">
         <ul>
@@ -216,14 +216,14 @@ git commit --amend --no-edit</code></pre><div class="what">Suma el archivo al ú
     <div class="explain"><p>Hiciste un <code>reset --hard</code> de más, borraste una rama o un rebase salió mal. Mientras los cambios hayan estado <b>commiteados</b>, casi seguro se pueden recuperar: Git guarda en el <b>reflog</b> cada lugar por donde pasó HEAD durante los últimos meses.</p></div>
     <div class="grid cols-2">
       <div class="card">
-        <div class="cmd"><pre><code>git reflog</code></pre><div class="what">Lista los movimientos recientes, del más nuevo al más viejo.</div></div>
+        <div class="cmd"><pre><code>git reflog</code></pre><div class="what">El <b>reflog</b> es un registro local de cada vez que <code>HEAD</code> se movió: commits, resets, cambios de rama, merges. Lista los movimientos del más nuevo al más viejo, con el hash de cada punto. Permite encontrar commits que ya no aparecen en <code>git log</code>. Se conserva unos 90 días.</div></div>
         <pre class="out"><code data-lang="plain">b7e10c2 HEAD@{0}: reset: moving to HEAD~1
 9f2d4aa HEAD@{1}: commit: Agrega la ruta /health
 b7e10c2 HEAD@{2}: commit: Corrige el puerto</code></pre>
         <div class="explain" style="margin-top:8px"><p>Acá, el commit “Agrega la ruta /health” (<code>9f2d4aa</code>) es el que se perdió con el reset.</p></div>
       </div>
       <div class="card">
-        <div class="cmd"><pre><code>git reset --hard 9f2d4aa</code></pre><div class="what">Vuelve la rama a ese commit.</div></div>
+        <div class="cmd"><pre><code>git reset --hard 9f2d4aa</code></pre><div class="what">Mueve la rama actual a ese commit y deja los archivos exactamente como estaban en él. ⚠ Los cambios sin commitear que tengas en ese momento se pierden, así que hacé <code>git status</code> antes.</div></div>
         <div class="cmd"><pre><code>git branch rescate 9f2d4aa</code></pre><div class="what">Alternativa más prudente: crea una rama apuntando a ese commit, sin mover la actual.</div></div>
         <div class="callout info"><span class="ico">i</span><p>El reflog es solo local: no se sube a GitHub ni existe en otro clon.</p></div>
       </div>

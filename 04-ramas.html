@@ -108,16 +108,16 @@
         <h3>Crear y cambiar</h3>
         <div class="cmd"><pre><code>git switch -c nueva-ruta</code></pre><div class="what">Crea la rama <code>nueva-ruta</code> a partir del commit actual y se cambia a ella (<code>-c</code> = <i>create</i>). Es lo que vas a usar casi siempre.</div></div>
         <div class="cmd"><pre><code>git switch main</code></pre><div class="what">Cambia a una rama que ya existe. Los archivos de la carpeta pasan a ser los de esa rama.</div></div>
-        <div class="cmd"><pre><code>git switch -</code></pre><div class="what">Vuelve a la rama anterior (como el “atrás” del navegador).</div></div>
+        <div class="cmd"><pre><code>git switch -</code></pre><div class="what">Vuelve a la rama en la que estabas antes del último cambio, como el botón “atrás” del navegador. Repetirlo te lleva de nuevo a la otra: sirve para ir y venir entre dos ramas.</div></div>
         <div class="callout info"><span class="ico">i</span><p>En tutoriales viejos vas a ver <code>git checkout -b nueva-ruta</code> y <code>git checkout main</code>: hacen lo mismo.</p></div>
       </div>
       <div class="card">
         <h3>Ver, renombrar y borrar</h3>
-        <div class="cmd"><pre><code>git branch</code></pre><div class="what">Lista las ramas locales; la actual tiene <code>*</code>.</div></div>
-        <div class="cmd"><pre><code>git branch -a</code></pre><div class="what">Incluye las ramas del remoto (aparecen como <code>remotes/origin/...</code>).</div></div>
-        <div class="cmd"><pre><code>git branch -m nombre-nuevo</code></pre><div class="what">Renombra la rama actual.</div></div>
+        <div class="cmd"><pre><code>git branch</code></pre><div class="what">Lista las ramas que tenés en tu PC; la actual está marcada con <code>*</code>. Con <code>-v</code> muestra además el último commit de cada una.</div></div>
+        <div class="cmd"><pre><code>git branch -a</code></pre><div class="what">Incluye las ramas del remoto que Git conoce desde el último <code>fetch</code>; aparecen como <code>remotes/origin/nombre</code>. Para trabajar en una de ellas, <code>git switch nombre</code> crea la rama local conectada.</div></div>
+        <div class="cmd"><pre><code>git branch -m nombre-nuevo</code></pre><div class="what">Cambia el nombre de la rama en la que estás (<code>-m</code> = <i>move</i>). Si ya la habías subido, en GitHub sigue con el nombre viejo: subí la nueva con <code>git push -u origin nombre-nuevo</code> y borrá la vieja allá.</div></div>
         <div class="cmd"><pre><code>git branch -d nueva-ruta</code></pre><div class="what">Borra una rama que ya se unió. Si tiene commits sin unir, Git se niega para protegerte; <code>-D</code> la borra igual (se pierden esos commits).</div></div>
-        <div class="cmd"><pre><code>git push origin --delete nueva-ruta</code></pre><div class="what">Borra la rama en GitHub.</div></div>
+        <div class="cmd"><pre><code>git push origin --delete nueva-ruta</code></pre><div class="what">Borra la rama en GitHub (en el remoto <code>origin</code>). <code>git branch -d</code> solo borra la copia de tu PC; para quitarla de los dos lados, hacen falta los dos comandos.</div></div>
       </div>
     </div>
     <div class="callout warn"><span class="ico">!</span><p><b>Cambios sin commitear al cambiar de rama:</b> si tus cambios no chocan con la otra rama, viajan con vos. Si chocan, Git no te deja cambiar (<i>“Your local changes would be overwritten”</i>). Commiteá primero o guardalos con <code>git stash</code>.</p></div>
@@ -138,7 +138,7 @@
 git pull
 git merge nueva-ruta</code></pre><div class="what">1) Ir a la rama destino. 2) Traer lo último del remoto. 3) Unir <code>nueva-ruta</code> dentro de <code>main</code>.</div></div>
         <div class="cmd"><pre><code>git push
-git branch -d nueva-ruta</code></pre><div class="what">Subir el resultado y borrar la rama, que ya no hace falta.</div></div>
+git branch -d nueva-ruta</code></pre><div class="what"><code>git push</code> sube a GitHub el <code>main</code> con la rama ya unida. Después, <code>git branch -d</code> borra la rama local: sus commits ya forman parte de <code>main</code>, así que no se pierde nada.</div></div>
       </div>
       <div class="card">
         <h3>Qué podés ver al hacer merge</h3>

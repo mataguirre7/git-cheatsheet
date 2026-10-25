@@ -94,9 +94,9 @@ Untracked files:
       <div class="titles"><h2>Preparar cambios (git add)</h2><p>Elegir qué va a entrar en el próximo commit.</p></div>
     </div>
     <div class="card">
-      <div class="cmd"><pre><code>git add app.js</code></pre><div class="what">Prepara un archivo puntual.</div></div>
+      <div class="cmd"><pre><code>git add app.js</code></pre><div class="what">Prepara solo ese archivo para el próximo commit; el resto de los cambios queda afuera. Podés nombrar varios separados por espacio (<code>git add app.js package.json</code>).</div></div>
       <div class="cmd"><pre><code>git add .</code></pre><div class="what">Prepara <b>todo</b> lo que cambió en la carpeta actual y sus subcarpetas (respetando el <code>.gitignore</code>). Mirá <code>git status</code> antes para no incluir algo de más.</div></div>
-      <div class="cmd"><pre><code>git add src/</code></pre><div class="what">Prepara todo lo de una carpeta.</div></div>
+      <div class="cmd"><pre><code>git add src/</code></pre><div class="what">Prepara todo lo que cambió dentro de la carpeta <code>src/</code> y sus subcarpetas, sin tocar lo que cambió fuera de ella.</div></div>
       <div class="cmd"><pre><code>git add -p</code></pre><div class="what">Modo interactivo: te muestra cada bloque de cambios y preguntás uno por uno (<code>y</code> = sí, <code>n</code> = no, <code>q</code> = salir). Sirve para dividir un archivo con dos cambios distintos en dos commits.</div></div>
       <div class="cmd"><pre><code>git restore --staged app.js</code></pre><div class="what">Lo contrario de <code>add</code>: saca el archivo del área de preparación. <b>No</b> pierde tus cambios; solo dejan de estar preparados.</div></div>
     </div>
@@ -111,7 +111,7 @@ Untracked files:
     <div class="grid cols-2">
       <div class="card">
         <h3>Formas de commitear</h3>
-        <div class="cmd"><pre><code>git commit -m "Agrega la ruta /health"</code></pre><div class="what">Guarda lo preparado con ese mensaje.</div></div>
+        <div class="cmd"><pre><code>git commit -m "Agrega la ruta /health"</code></pre><div class="what">Guarda en el historial todo lo que está preparado (lo que agregaste con <code>git add</code>), con ese mensaje. Lo no preparado queda sin guardar en la carpeta. Escribí el mensaje en presente y diciendo qué cambia, para que se entienda al leer el historial.</div></div>
         <div class="cmd"><pre><code>git commit</code></pre><div class="what">Sin <code>-m</code>, Git abre el editor configurado para que escribas un mensaje largo. Primera línea = título; línea vacía; después el detalle. Guardá y cerrá el editor para terminar.</div></div>
         <div class="cmd"><pre><code>git commit -am "Corrige el puerto"</code></pre><div class="what"><code>-a</code> prepara automáticamente los archivos <b>ya rastreados</b> que cambiaron y commitea en un paso. Los archivos nuevos no entran: esos necesitan <code>git add</code>.</div></div>
         <div class="cmd"><pre><code>git commit --amend -m "Mensaje corregido"</code></pre><div class="what">Reemplaza el <b>último</b> commit (para corregir el mensaje o sumar un archivo olvidado). Usalo solo si todavía no hiciste <code>push</code> de ese commit.</div></div>
@@ -141,21 +141,21 @@ para saber si el Pod está listo para recibir tráfico.</code></pre>
     <div class="grid cols-2">
       <div class="card">
         <h3>Variantes útiles</h3>
-        <div class="cmd"><pre><code>git log --oneline</code></pre><div class="what">Un commit por línea: hash corto y título.</div></div>
+        <div class="cmd"><pre><code>git log --oneline</code></pre><div class="what">Muestra el historial con un commit por línea: el <b>hash</b> corto (el identificador del commit) y la primera línea del mensaje. El más nuevo arriba.</div></div>
         <pre class="out"><code data-lang="plain">3ddb522 (HEAD -&gt; main, origin/main) Desactiva ligaduras en los chips
 71fc95b Update README.md
 279f465 first commit</code></pre>
         <div class="explain"><p><code>HEAD -&gt; main</code>: estás en <code>main</code>. <code>origin/main</code>: hasta dónde llega la rama en GitHub (según el último <code>fetch</code>/<code>pull</code>).</p></div>
         <div class="cmd"><pre><code>git log --oneline --graph --all</code></pre><div class="what">Dibuja las ramas con líneas: ideal para entender cómo se separan y se unen.</div></div>
-        <div class="cmd"><pre><code>git log -5</code></pre><div class="what">Solo los últimos 5 commits, con autor, fecha y mensaje completo.</div></div>
+        <div class="cmd"><pre><code>git log -5</code></pre><div class="what">Muestra solo los últimos 5 commits (cambiá el número a gusto), con el hash completo, autor, fecha y mensaje entero. Si la lista es larga, Git la muestra por páginas: <kbd>Espacio</kbd> avanza y <kbd>q</kbd> sale.</div></div>
       </div>
       <div class="card">
         <h3>Buscar en el historial</h3>
         <div class="cmd"><pre><code>git log --oneline -- app.js</code></pre><div class="what">Solo los commits que tocaron ese archivo. El <code>--</code> separa opciones de nombres de archivo.</div></div>
-        <div class="cmd"><pre><code>git log --stat</code></pre><div class="what">Además, qué archivos cambió cada commit y cuántas líneas.</div></div>
-        <div class="cmd"><pre><code>git log --author="&lt;nombre&gt;" --since="2 weeks ago"</code></pre><div class="what">Filtrar por autor y fecha.</div></div>
-        <div class="cmd"><pre><code>git log --grep="puerto"</code></pre><div class="what">Commits cuyo mensaje contiene esa palabra.</div></div>
-        <div class="cmd"><pre><code>git show 3ddb522</code></pre><div class="what">Todo sobre un commit: autor, fecha, mensaje y el diff completo.</div></div>
+        <div class="cmd"><pre><code>git log --stat</code></pre><div class="what">Además de cada commit, lista qué archivos tocó y cuántas líneas agregó (<code>+</code>) o quitó (<code>-</code>) en cada uno. Útil para encontrar cuándo se cambió algo.</div></div>
+        <div class="cmd"><pre><code>git log --author="&lt;nombre&gt;" --since="2 weeks ago"</code></pre><div class="what">Filtra el historial: solo commits de esa persona (alcanza con parte del nombre o el email) en las últimas dos semanas. Las fechas aceptan formas como <code>"2026-01-31"</code> o <code>"3 days ago"</code>.</div></div>
+        <div class="cmd"><pre><code>git log --grep="puerto"</code></pre><div class="what">Muestra solo los commits cuyo mensaje contiene esa palabra. Por eso conviene escribir mensajes descriptivos. Agregá <code>-i</code> para no distinguir mayúsculas.</div></div>
+        <div class="cmd"><pre><code>git show 3ddb522</code></pre><div class="what">Muestra todo sobre un commit: autor, fecha, mensaje y el <b>diff</b> (las líneas agregadas en verde con <code>+</code> y las quitadas en rojo con <code>-</code>). Alcanza con los primeros 7 caracteres del hash. <kbd>q</kbd> para salir.</div></div>
       </div>
     </div>
   </section>
@@ -171,9 +171,9 @@ para saber si el Pod está listo para recibir tráfico.</code></pre>
         <h3>Qué compara cada variante</h3>
         <div class="cmd"><pre><code>git diff</code></pre><div class="what">Cambios <b>no preparados</b>: carpeta de trabajo contra el área de preparación.</div></div>
         <div class="cmd"><pre><code>git diff --staged</code></pre><div class="what">Cambios <b>preparados</b>: lo que va a entrar en el próximo commit. Ideal para revisar antes de commitear.</div></div>
-        <div class="cmd"><pre><code>git diff HEAD</code></pre><div class="what">Todo lo que cambió desde el último commit, preparado o no.</div></div>
-        <div class="cmd"><pre><code>git diff main..nueva-ruta</code></pre><div class="what">Diferencias entre dos ramas.</div></div>
-        <div class="cmd"><pre><code>git diff --stat</code></pre><div class="what">Solo el resumen: archivos y cantidad de líneas.</div></div>
+        <div class="cmd"><pre><code>git diff HEAD</code></pre><div class="what">Todo lo que cambió desde el último commit, esté preparado o no. <code>HEAD</code> significa “el commit en el que estás parado”.</div></div>
+        <div class="cmd"><pre><code>git diff main..nueva-ruta</code></pre><div class="what">Muestra qué cambia en <code>nueva-ruta</code> respecto de <code>main</code>: lo que se agregaría al unirlas. Sirve para revisar una rama antes de hacer <code>merge</code> o abrir un pull request.</div></div>
+        <div class="cmd"><pre><code>git diff --stat</code></pre><div class="what">En vez de las líneas, un resumen: qué archivos cambiaron y cuántas líneas en cada uno. Se combina con las otras formas (<code>git diff --staged --stat</code>).</div></div>
       </div>
       <div class="card">
         <h3>Cómo leer un diff</h3>
@@ -217,13 +217,13 @@ para saber si el Pod está listo para recibir tráfico.</code></pre>
       <div class="card">
         <h3>Guardar y recuperar</h3>
         <div class="cmd"><pre><code>git stash push -m "mitad del formulario"</code></pre><div class="what">Guarda los cambios de archivos rastreados con un nombre. Con <code>-u</code> incluye también los archivos nuevos.</div></div>
-        <div class="cmd"><pre><code>git stash list</code></pre><div class="what">Lo que hay en el cajón: <code>stash@{0}</code> es el más reciente.</div></div>
-        <div class="cmd"><pre><code>git stash pop</code></pre><div class="what">Devuelve el último guardado a la carpeta y lo saca del cajón.</div></div>
+        <div class="cmd"><pre><code>git stash list</code></pre><div class="what">Lista lo que guardaste con <code>stash</code>, como un cajón: <code>stash@{0}</code> es lo último que guardaste, <code>stash@{1}</code> lo anterior, y así. Al lado aparece la rama donde estabas y el mensaje.</div></div>
+        <div class="cmd"><pre><code>git stash pop</code></pre><div class="what">Devuelve a tu carpeta los cambios del último stash y lo saca del cajón. Si esos cambios chocan con lo que tenés ahora, aparece un conflicto (se resuelve igual que en un merge) y el stash queda guardado.</div></div>
       </div>
       <div class="card">
         <h3>Más opciones</h3>
         <div class="cmd"><pre><code>git stash apply stash@{1}</code></pre><div class="what">Devuelve uno puntual pero lo deja en el cajón (sirve para aplicarlo en varias ramas).</div></div>
-        <div class="cmd"><pre><code>git stash drop stash@{1}</code></pre><div class="what">Borra uno del cajón.</div></div>
+        <div class="cmd"><pre><code>git stash drop stash@{1}</code></pre><div class="what">Borra un stash puntual sin aplicarlo: esos cambios se pierden. <code>git stash clear</code> vacía el cajón entero.</div></div>
         <div class="callout warn"><span class="ico">!</span><p>El stash es local y temporal: no se sube a GitHub. Para algo que dure, mejor un commit en una rama.</p></div>
       </div>
     </div>
@@ -239,8 +239,8 @@ para saber si el Pod está listo para recibir tráfico.</code></pre>
     <div class="grid cols-2">
       <div class="card">
         <div class="cmd"><pre><code>git tag -a v1.0.0 -m "Primera versión estable"</code></pre><div class="what">Crea un tag “anotado” (con autor, fecha y mensaje) en el commit actual. Es el tipo recomendado.</div></div>
-        <div class="cmd"><pre><code>git tag</code></pre><div class="what">Lista los tags.</div></div>
-        <div class="cmd"><pre><code>git show v1.0.0</code></pre><div class="what">Qué commit marca y su contenido.</div></div>
+        <div class="cmd"><pre><code>git tag</code></pre><div class="what">Lista todos los tags del repositorio, en orden alfabético. <code>git tag -l "v1.*"</code> filtra por patrón.</div></div>
+        <div class="cmd"><pre><code>git show v1.0.0</code></pre><div class="what">Muestra los datos del tag (quién lo creó, cuándo y su mensaje) y el commit al que apunta, con sus cambios. Los tags no se suben solos: <code>git push origin v1.0.0</code> (o <code>--tags</code> para todos).</div></div>
       </div>
       <div class="card">
         <div class="cmd"><pre><code>git push origin v1.0.0</code></pre><div class="what">Los tags <b>no</b> se suben con <code>git push</code> normal: hay que subirlos explícitamente (o todos con <code>git push --tags</code>).</div></div>

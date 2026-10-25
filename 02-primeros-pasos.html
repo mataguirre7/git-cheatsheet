@@ -115,7 +115,7 @@
         <h3>Quién sos (obligatorio)</h3>
         <div class="explain"><p>Cada commit guarda nombre y email del autor. Sin esto, Git no te deja hacer commits. Usá <b>el mismo email que tu cuenta de GitHub</b>, así GitHub asocia los commits con tu perfil.</p></div>
         <div class="cmd"><pre><code>git config --global user.name "&lt;Tu Nombre&gt;"
-git config --global user.email "&lt;tu-email@ejemplo.com&gt;"</code></pre><div class="what">Las comillas son necesarias si el nombre tiene espacios.</div></div>
+git config --global user.email "&lt;tu-email@ejemplo.com&gt;"</code></pre><div class="what">Le dice a Git qué nombre poner como autor en cada commit que hagas (<code>--global</code> = para todos los proyectos de esta PC). Las comillas son necesarias si el nombre tiene espacios. Se configura una sola vez.</div></div>
       </div>
       <div class="card">
         <h3>Preferencias recomendadas</h3>
@@ -125,7 +125,7 @@ git config --global user.email "&lt;tu-email@ejemplo.com&gt;"</code></pre><div c
       </div>
       <div class="card wide">
         <h3>Revisar lo configurado</h3>
-        <div class="cmd"><pre><code>git config --global --list</code></pre><div class="what">Muestra toda tu configuración global.</div></div>
+        <div class="cmd"><pre><code>git config --global --list</code></pre><div class="what">Muestra toda tu configuración global, una línea por opción (<code>user.name=…</code>, <code>user.email=…</code>). Sirve para comprobar que quedó bien. Si la lista es larga, <kbd>q</kbd> sale.</div></div>
         <pre class="out"><code data-lang="plain">user.name=Tu Nombre
 user.email=tu-email@ejemplo.com
 init.defaultbranch=main
@@ -201,7 +201,7 @@ Untracked files:
  1 file changed, 3 insertions(+)
  create mode 100644 README.md</code></pre>
         <div class="explain"><p><code>a1f3c9e</code> es el hash de tu commit (el tuyo va a ser otro). <i>root-commit</i> significa que es el primero del repo.</p></div>
-        <div class="cmd"><pre><code>git log --oneline</code></pre><div class="what">El historial, un commit por línea.</div></div>
+        <div class="cmd"><pre><code>git log --oneline</code></pre><div class="what">Muestra el historial con un commit por línea: el hash corto (el identificador del commit) y el mensaje. Por ahora vas a ver uno solo.</div></div>
         <pre class="out"><code data-lang="plain">a1f3c9e (HEAD -&gt; main) Primer commit: agrega README</code></pre>
       </div>
     </div>
@@ -341,7 +341,7 @@ git clone https://github.com/&lt;usuario&gt;/mi-proyecto.git</code></pre><div cl
 remote: Enumerating objects: 6, done.
 Receiving objects: 100% (6/6), done.</code></pre>
         <div class="cmd"><pre><code>cd mi-proyecto
-git log --oneline</code></pre><div class="what">Entrás y ves el mismo historial que en la otra computadora.</div></div>
+git log --oneline</code></pre><div class="what">Entrás a la carpeta que creó <code>git clone</code>. Ya es un repositorio completo: <code>git log</code> muestra el mismo historial que en la otra computadora y <code>git remote -v</code> confirma que está conectado a GitHub.</div></div>
       </div>
       <div class="card">
         <h3>Resumen: ¿init o clone?</h3>

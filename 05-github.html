@@ -127,8 +127,8 @@ git remote remove github</code></pre><div class="what">Renombrar o quitar un rem
       <div class="card">
         <h3>Traer cambios</h3>
         <div class="cmd"><pre><code>git fetch</code></pre><div class="what">Descarga novedades de todas las ramas del remoto. Después, <code>git status</code> te dice si estás atrás (<i>behind</i>) o adelante (<i>ahead</i>).</div></div>
-        <div class="cmd"><pre><code>git log --oneline main..origin/main</code></pre><div class="what">Qué commits hay en GitHub que todavía no tenés.</div></div>
-        <div class="cmd"><pre><code>git pull</code></pre><div class="what">Trae y une a tu rama actual. Hacelo al empezar a trabajar.</div></div>
+        <div class="cmd"><pre><code>git log --oneline main..origin/main</code></pre><div class="what">Después de un <code>git fetch</code>, lista los commits que están en GitHub (<code>origin/main</code>) y todavía no en tu <code>main</code>: lo que vas a recibir con el próximo <code>pull</code>. Al revés (<code>origin/main..main</code>) muestra lo tuyo que falta subir.</div></div>
+        <div class="cmd"><pre><code>git pull</code></pre><div class="what">Descarga los commits nuevos del remoto y los une a tu rama actual (es <code>fetch</code> + <code>merge</code>). Hacelo al empezar a trabajar y antes de <code>push</code>. Si vos y otra persona cambiaron las mismas líneas, aparece un conflicto (ver <a href="04-ramas.html">Ramas</a>).</div></div>
       </div>
       <div class="card">
         <h3>Subir cambios</h3>
