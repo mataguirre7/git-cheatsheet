@@ -1,0 +1,369 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Guía paso a paso de Git en Windows: instalar, configurar, crear un repositorio, primer commit, .gitignore, subir a GitHub y clonar.">
+<meta name="theme-color" content="#bc4c00">
+<title>Git · Primeros pasos</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect x='4' y='4' width='56' height='56' rx='14' fill='%23bc4c00'/%3E%3Cg fill='none' stroke='%23fff' stroke-width='3.4' stroke-linecap='round'%3E%3Cpath d='M22 18v28'/%3E%3Cpath d='M22 30c0-6 20-4 20-12'/%3E%3C/g%3E%3Cg fill='%23fff'%3E%3Ccircle cx='22' cy='18' r='4.5'/%3E%3Ccircle cx='22' cy='46' r='4.5'/%3E%3Ccircle cx='42' cy='18' r='4.5'/%3E%3C/g%3E%3C/svg%3E">
+<link rel="stylesheet" href="assets/style.css">
+<script src="assets/app.js"></script>
+</head>
+<body data-page="empezar">
+<header class="topbar"></header>
+
+<main class="wrap">
+
+  <div class="hero">
+    <span class="eyebrow">Git · 02</span>
+    <h1>Primeros pasos: de cero a tu proyecto en GitHub</h1>
+    <p class="lead">Una guía completa para hacer en orden, en Windows. Al terminar vas a tener Git instalado y configurado, un proyecto con historial y una copia en GitHub que podés clonar desde cualquier computadora. Cada comando viene con lo que hace y con la salida que deberías ver.</p>
+    <nav class="toc">
+      <a href="#terminal">0 · La terminal</a>
+      <a href="#instalar">1 · Instalar</a>
+      <a href="#configurar">2 · Configurar</a>
+      <a href="#init">3 · Crear el repo</a>
+      <a href="#commit">4 · Primer commit</a>
+      <a href="#gitignore">5 · .gitignore</a>
+      <a href="#github">6 · Crear el repo en GitHub</a>
+      <a href="#push">7 · Subir</a>
+      <a href="#ciclo">8 · El ciclo diario</a>
+      <a href="#clonar">9 · Clonar</a>
+    </nav>
+  </div>
+
+  <section class="terms-box">
+    <h2>Términos de esta página</h2>
+    <p>Si alguno no te suena, mirá también <a href="01-conceptos.html">Conceptos</a>.</p>
+    <dl class="terms">
+      <dt>Terminal</dt><dd>La ventana donde escribís comandos de texto. En Windows usamos <b>PowerShell</b> (o la pestaña Terminal de VS Code, que abre lo mismo).</dd>
+      <dt>Comando</dt><dd>Una instrucción que escribís en la terminal y ejecutás con <kbd>Enter</kbd>, por ejemplo <code>git status</code>.</dd>
+      <dt>Carpeta actual</dt><dd>La carpeta en la que “está parada” la terminal. Git actúa sobre el repositorio de esa carpeta. Se cambia con <code>cd</code>.</dd>
+      <dt>winget</dt><dd>El instalador de programas por línea de comandos que viene con Windows 10/11.</dd>
+      <dt>Configuración global</dt><dd>Ajustes de Git que valen para todos tus proyectos (se guardan en el archivo <code>.gitconfig</code> de tu usuario).</dd>
+      <dt>Repositorio (repo)</dt><dd>Carpeta con historial de Git (tiene una subcarpeta oculta <code>.git</code>).</dd>
+      <dt>Commit</dt><dd>Una foto guardada del proyecto con un mensaje.</dd>
+      <dt>.gitignore</dt><dd>Un archivo de texto con la lista de cosas que Git debe ignorar (dependencias, contraseñas, archivos temporales).</dd>
+      <dt>Remoto / origin</dt><dd>La copia del repo en GitHub. <code>origin</code> es el nombre que se le da por convención.</dd>
+      <dt>Git Credential Manager</dt><dd>Un ayudante que viene con Git para Windows: cuando GitHub te pide iniciar sesión, abre el navegador y después recuerda la sesión.</dd>
+      <dt>Upstream</dt><dd>La rama del remoto con la que se “empareja” tu rama local, para que <code>git push</code> y <code>git pull</code> sepan adónde ir sin aclararlo.</dd>
+    </dl>
+  </section>
+
+  <!-- ================= TERMINAL ================= -->
+  <section class="block" id="terminal">
+    <div class="section-head">
+      <div class="num">0</div>
+      <div class="titles"><h2>Antes de empezar: la terminal y cómo leer esta guía</h2></div>
+    </div>
+    <div class="grid cols-2">
+      <div class="card">
+        <h3>Abrir una terminal en una carpeta</h3>
+        <ul>
+          <li><b>Desde el Explorador de Windows:</b> abrí la carpeta, clic derecho en un espacio vacío → <b>Abrir en Terminal</b>.</li>
+          <li><b>Desde VS Code:</b> menú <b>Terminal → Nueva terminal</b>. Se abre ya parada en la carpeta del proyecto.</li>
+          <li><b>Desde el menú Inicio:</b> buscá <b>PowerShell</b> o <b>Terminal</b>.</li>
+        </ul>
+        <div class="cmd"><pre><code>cd E:\Development</code></pre><div class="what"><code>cd</code> = “cambiar de carpeta”. Después de esto, los comandos actúan sobre <code>E:\Development</code>.</div></div>
+        <div class="cmd"><pre><code>ls</code></pre><div class="what">Lista lo que hay en la carpeta actual (en PowerShell también funciona <code>dir</code>).</div></div>
+      </div>
+      <div class="card">
+        <h3>Cómo leer los bloques de esta guía</h3>
+        <ul>
+          <li>Los bloques <b>oscuros</b> son comandos: se escriben (o se copian con el botón de la derecha) y se ejecutan con <kbd>Enter</kbd>. Si hay varias líneas, van de a una.</li>
+          <li>Lo que está entre <code>&lt;</code> y <code>&gt;</code> se reemplaza por tu valor, <b>sin</b> los signos. Ej.: <code>&lt;usuario&gt;</code> → <code>mataguirre7</code>.</li>
+          <li>Lo que empieza con <code>#</code> es un comentario: explica, no se ejecuta.</li>
+          <li>Los bloques <b>grises</b> que dicen “salida” muestran lo que responde la terminal. Sirven para comparar, no se escriben.</li>
+        </ul>
+        <pre class="out"><code data-lang="plain">git version 2.50.1.windows.1</code></pre>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= INSTALAR ================= -->
+  <section class="block" id="instalar">
+    <div class="section-head">
+      <div class="num">1</div>
+      <div class="titles"><h2>Instalar Git</h2><p>Una sola vez por computadora.</p></div>
+    </div>
+    <div class="grid cols-2">
+      <div class="card">
+        <h3>Con winget (recomendado)</h3>
+        <div class="cmd"><pre><code>winget install --id Git.Git -e --source winget</code></pre><div class="what">Descarga e instala Git para Windows. <code>-e</code> pide la coincidencia exacta del nombre. Si te pregunta, aceptá los términos con <code>Y</code>.</div></div>
+        <div class="callout warn"><span class="ico">!</span><p><b>Cerrá la terminal y abrí una nueva</b> después de instalar: las terminales abiertas no ven el programa nuevo hasta que se reinician.</p></div>
+        <p style="margin-top:10px">También podés bajar el instalador desde <code>git-scm.com</code> y dejar todas las opciones por defecto.</p>
+      </div>
+      <div class="card">
+        <h3>Verificar</h3>
+        <div class="cmd"><pre><code>git --version</code></pre><div class="what">Si ves un número de versión, Git está instalado. El número exacto puede variar.</div></div>
+        <pre class="out"><code data-lang="plain">git version 2.50.1.windows.1</code></pre>
+        <div class="callout bad"><span class="ico">✕</span><p>Si dice <i>“git no se reconoce como nombre de un cmdlet”</i>, la terminal es anterior a la instalación (abrí una nueva) o la instalación no terminó.</p></div>
+        <div class="callout info"><span class="ico">i</span><p>El instalador trae también <b>Git Bash</b> (otra terminal) y el <b>Git Credential Manager</b>, que vas a usar en el paso 7 para iniciar sesión en GitHub.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= CONFIGURAR ================= -->
+  <section class="block" id="configurar">
+    <div class="section-head">
+      <div class="num">2</div>
+      <div class="titles"><h2>Configurar tu identidad y preferencias</h2><p>Una sola vez por computadora. <code>--global</code> significa “para todos mis repositorios”.</p></div>
+    </div>
+    <div class="grid cols-2">
+      <div class="card">
+        <h3>Quién sos (obligatorio)</h3>
+        <div class="explain"><p>Cada commit guarda nombre y email del autor. Sin esto, Git no te deja hacer commits. Usá <b>el mismo email que tu cuenta de GitHub</b>, así GitHub asocia los commits con tu perfil.</p></div>
+        <div class="cmd"><pre><code>git config --global user.name "&lt;Tu Nombre&gt;"
+git config --global user.email "&lt;tu-email@ejemplo.com&gt;"</code></pre><div class="what">Las comillas son necesarias si el nombre tiene espacios.</div></div>
+      </div>
+      <div class="card">
+        <h3>Preferencias recomendadas</h3>
+        <div class="cmd"><pre><code>git config --global init.defaultBranch main</code></pre><div class="what">Que la rama principal de los repos nuevos se llame <code>main</code> (el estándar actual de GitHub).</div></div>
+        <div class="cmd"><pre><code>git config --global core.autocrlf true</code></pre><div class="what">Windows y Linux marcan el fin de línea distinto (CRLF y LF). Con esto Git los convierte solo y evita diferencias falsas. Es la causa del aviso <i>“LF will be replaced by CRLF”</i>: es normal.</div></div>
+        <div class="cmd"><pre><code>git config --global core.editor "code --wait"</code></pre><div class="what">Opcional: si Git necesita que escribas un texto largo (por ejemplo un mensaje de merge), lo abre en VS Code.</div></div>
+      </div>
+      <div class="card wide">
+        <h3>Revisar lo configurado</h3>
+        <div class="cmd"><pre><code>git config --global --list</code></pre><div class="what">Muestra toda tu configuración global.</div></div>
+        <pre class="out"><code data-lang="plain">user.name=Tu Nombre
+user.email=tu-email@ejemplo.com
+init.defaultbranch=main
+core.autocrlf=true</code></pre>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= INIT ================= -->
+  <section class="block" id="init">
+    <div class="section-head">
+      <div class="num">3</div>
+      <div class="titles"><h2>Crear un repositorio</h2><p>Convertir una carpeta en un proyecto con historial.</p></div>
+    </div>
+    <div class="grid cols-2">
+      <div class="card">
+        <h3>Carpeta nueva</h3>
+        <div class="cmd"><pre><code>mkdir mi-proyecto
+cd mi-proyecto
+git init</code></pre><div class="what"><code>mkdir</code> crea la carpeta, <code>cd</code> entra en ella y <code>git init</code> crea el repositorio vacío (la carpeta oculta <code>.git</code>).</div></div>
+        <pre class="out"><code data-lang="plain">Initialized empty Git repository in E:/Development/mi-proyecto/.git/</code></pre>
+      </div>
+      <div class="card">
+        <h3>Proyecto que ya existe</h3>
+        <div class="explain"><p>Si ya tenés una carpeta con código, no hace falta crear nada: entrá a la carpeta y corré <code>git init</code> ahí. Los archivos no se tocan; solo se agrega <code>.git</code>.</p></div>
+        <div class="cmd"><pre><code>cd &lt;ruta-de-tu-proyecto&gt;
+git init</code></pre></div>
+        <div class="callout warn"><span class="ico">!</span><p>No borres la carpeta <code>.git</code>: ahí está todo el historial. Si la borrás, la carpeta vuelve a ser una carpeta común.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= COMMIT ================= -->
+  <section class="block" id="commit">
+    <div class="section-head">
+      <div class="num">4</div>
+      <div class="titles"><h2>Tu primer commit</h2><p>El ciclo básico: crear o editar → <code>status</code> → <code>add</code> → <code>commit</code>.</p></div>
+    </div>
+    <div class="grid cols-2">
+      <div class="card">
+        <h3>a) Crear un archivo</h3>
+        <div class="explain"><p>Creá un archivo <code>README.md</code> con tu editor (es el texto que GitHub muestra en la portada del repo). Por ejemplo, con este contenido:</p></div>
+        <pre><code data-lang="none"># Mi proyecto
+
+Un proyecto para practicar Git.</code></pre>
+        <div class="cmd"><pre><code>code README.md</code></pre><div class="what">Abre (o crea) el archivo en VS Code. Sin VS Code: <code>notepad README.md</code>.</div></div>
+        <div class="callout warn"><span class="ico">!</span><p>Evitá <code>echo "texto" &gt; archivo</code> en Windows PowerShell 5.1: guarda el archivo en UTF-16 y en GitHub se ve con caracteres raros. Usá el editor.</p></div>
+      </div>
+      <div class="card">
+        <h3>b) Ver el estado</h3>
+        <div class="cmd"><pre><code>git status</code></pre><div class="what">El comando que más vas a usar: dice en qué rama estás y qué archivos cambiaron. No modifica nada.</div></div>
+        <pre class="out"><code data-lang="plain">On branch main
+
+No commits yet
+
+Untracked files:
+  (use "git add &lt;file&gt;..." to include in what will be committed)
+        README.md</code></pre>
+        <div class="explain"><p><i>Untracked</i> = Git ve el archivo pero todavía no lo sigue.</p></div>
+      </div>
+      <div class="card">
+        <h3>c) Prepararlo (add)</h3>
+        <div class="cmd"><pre><code>git add README.md</code></pre><div class="what">Pone ese archivo en el área de preparación. Para agregar <b>todo</b> lo que cambió en la carpeta: <code>git add .</code> (el punto significa “esta carpeta”).</div></div>
+        <div class="cmd"><pre><code>git status</code></pre></div>
+        <pre class="out"><code data-lang="plain">Changes to be committed:
+  (use "git rm --cached &lt;file&gt;..." to unstage)
+        new file:   README.md</code></pre>
+      </div>
+      <div class="card">
+        <h3>d) Guardarlo (commit)</h3>
+        <div class="cmd"><pre><code>git commit -m "Primer commit: agrega README"</code></pre><div class="what"><code>-m</code> = el mensaje del commit, entre comillas. Describí qué cambia.</div></div>
+        <pre class="out"><code data-lang="plain">[main (root-commit) a1f3c9e] Primer commit: agrega README
+ 1 file changed, 3 insertions(+)
+ create mode 100644 README.md</code></pre>
+        <div class="explain"><p><code>a1f3c9e</code> es el hash de tu commit (el tuyo va a ser otro). <i>root-commit</i> significa que es el primero del repo.</p></div>
+        <div class="cmd"><pre><code>git log --oneline</code></pre><div class="what">El historial, un commit por línea.</div></div>
+        <pre class="out"><code data-lang="plain">a1f3c9e (HEAD -&gt; main) Primer commit: agrega README</code></pre>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= GITIGNORE ================= -->
+  <section class="block" id="gitignore">
+    <div class="section-head">
+      <div class="num">5</div>
+      <div class="titles"><h2>Decirle a Git qué ignorar (.gitignore)</h2><p>Hacelo antes del primer <code>git add .</code> en un proyecto real.</p></div>
+    </div>
+    <div class="grid cols-2">
+      <div class="card">
+        <h3>Qué no hay que subir nunca</h3>
+        <ul>
+          <li><b>Dependencias descargadas</b> (<code>node_modules/</code>, <code>.terraform/</code>): se regeneran con <code>npm install</code> o <code>terraform init</code> y pesan mucho.</li>
+          <li><b>Secretos</b> (<code>.env</code>, contraseñas, claves, <code>*.tfstate</code>): si llegan a GitHub, hay que considerarlos expuestos.</li>
+          <li><b>Archivos generados</b> (<code>dist/</code>, <code>build/</code>, logs).</li>
+          <li><b>Basura del sistema o del editor</b> (<code>Thumbs.db</code>, <code>.DS_Store</code>, <code>.vscode/</code>).</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>El archivo .gitignore</h3>
+        <div class="explain"><p>Creá un archivo llamado exactamente <code>.gitignore</code> (con el punto adelante, sin extensión) en la raíz del proyecto:</p></div>
+        <pre><code data-lang="plain"># dependencias
+node_modules/
+
+# secretos
+.env
+
+# generados
+dist/
+*.log
+
+# sistema
+Thumbs.db
+.DS_Store</code></pre>
+        <div class="explain" style="margin-top:10px"><p>Una línea por patrón. <code>carpeta/</code> ignora una carpeta entera; <code>*.log</code> ignora todos los archivos que terminan en <code>.log</code>; <code>#</code> es un comentario.</p></div>
+        <div class="cmd"><pre><code>git add .gitignore
+git commit -m "Agrega .gitignore"</code></pre><div class="what">El <code>.gitignore</code> <b>sí</b> se sube: así todos los que clonen ignoran lo mismo.</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= GITHUB ================= -->
+  <section class="block" id="github">
+    <div class="section-head">
+      <div class="num">6</div>
+      <div class="titles"><h2>Crear el repositorio en GitHub</h2><p>En el navegador. Si no tenés cuenta, creala gratis en <code>github.com</code>.</p></div>
+    </div>
+    <div class="card">
+      <ol class="steps">
+        <li>Entrá a <code>github.com</code> con tu cuenta y tocá el botón <b>+</b> (arriba a la derecha) → <b>New repository</b>.</li>
+        <li><b>Repository name:</b> el nombre del proyecto, por ejemplo <code>mi-proyecto</code> (sin espacios).</li>
+        <li><b>Public</b> (cualquiera lo ve) o <b>Private</b> (solo vos y quienes invites).</li>
+        <li><b>No marques</b> “Add a README”, “.gitignore” ni “license”: tu repo local ya tiene historial y un repo de GitHub con archivos propios generaría un conflicto al subir.</li>
+        <li>Tocá <b>Create repository</b>. GitHub te muestra una página con la URL del repo, del estilo <code>https://github.com/&lt;usuario&gt;/mi-proyecto.git</code>. Copiala.</li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- ================= PUSH ================= -->
+  <section class="block" id="push">
+    <div class="section-head">
+      <div class="num">7</div>
+      <div class="titles"><h2>Conectar y subir tu proyecto</h2><p>De vuelta en la terminal, en la carpeta del proyecto.</p></div>
+    </div>
+    <div class="grid cols-2">
+      <div class="card">
+        <h3>Los tres comandos</h3>
+        <div class="cmd"><pre><code>git remote add origin https://github.com/&lt;usuario&gt;/mi-proyecto.git</code></pre><div class="what">Le dice a tu repo local dónde está su copia en GitHub, y la llama <code>origin</code>. Se hace una sola vez por repo.</div></div>
+        <div class="cmd"><pre><code>git branch -M main</code></pre><div class="what">Se asegura de que tu rama se llame <code>main</code> (por si se creó como <code>master</code>). Si ya se llama así, no hace nada.</div></div>
+        <div class="cmd"><pre><code>git push -u origin main</code></pre><div class="what">Sube tus commits de <code>main</code> a <code>origin</code>. <code>-u</code> guarda la relación (el <i>upstream</i>): desde ahora alcanza con <code>git push</code> y <code>git pull</code>.</div></div>
+        <pre class="out"><code data-lang="plain">Enumerating objects: 6, done.
+Writing objects: 100% (6/6), 540 bytes | 540.00 KiB/s, done.
+To https://github.com/&lt;usuario&gt;/mi-proyecto.git
+ * [new branch]      main -&gt; main
+branch 'main' set up to track 'origin/main'.</code></pre>
+      </div>
+      <div class="card">
+        <h3>El inicio de sesión (solo la primera vez)</h3>
+        <div class="explain">
+          <p>Al hacer el primer <code>push</code>, el <b>Git Credential Manager</b> abre una ventana para iniciar sesión en GitHub:</p>
+          <ol>
+            <li>Elegí <b>Sign in with your browser</b>.</li>
+            <li>Se abre GitHub en el navegador: iniciá sesión y tocá <b>Authorize</b>.</li>
+            <li>Volvé a la terminal: el push continúa solo.</li>
+          </ol>
+          <p>La sesión queda guardada en el Administrador de credenciales de Windows, así que las próximas veces no pregunta.</p>
+        </div>
+        <div class="callout warn"><span class="ico">!</span><p>GitHub <b>no acepta tu contraseña</b> en la terminal. Si alguna herramienta te pide usuario y contraseña, usá el login por navegador o un <i>token</i> personal (ver <a href="07-problemas.html#acceso">Problemas</a>).</p></div>
+        <div class="callout tip"><span class="ico">✓</span><p>Recargá la página del repo en GitHub: tienen que aparecer tus archivos y el README.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= CICLO ================= -->
+  <section class="block" id="ciclo">
+    <div class="section-head">
+      <div class="num">8</div>
+      <div class="titles"><h2>El ciclo de todos los días</h2><p>Desde ahora, trabajar con Git es repetir esto.</p></div>
+    </div>
+    <div class="grid cols-2">
+      <div class="card">
+        <h3>Guardar y subir un cambio</h3>
+        <div class="cmd"><pre><code>git pull</code></pre><div class="what">Antes de empezar: trae lo que se haya subido desde otra computadora o por otra persona.</div></div>
+        <div class="cmd"><pre><code># ...editás archivos en el editor...
+git status
+git add .
+git commit -m "&lt;qué cambiaste&gt;"
+git push</code></pre><div class="what">Mirar qué cambió, prepararlo, guardarlo con un mensaje y subirlo.</div></div>
+      </div>
+      <div class="card">
+        <h3>Consejos</h3>
+        <ul>
+          <li>Hacé commits <b>chicos y seguidos</b>: es más fácil entender y deshacer un cambio chico.</li>
+          <li>Antes de <code>git add .</code>, mirá <code>git status</code> para no subir algo por error.</li>
+          <li><code>git diff</code> muestra exactamente qué líneas cambiaste (ver <a href="03-uso-diario.html">Uso diario</a>).</li>
+          <li>VS Code tiene un panel <b>Control de código fuente</b> (ícono de ramita) que hace lo mismo con botones: es Git por detrás.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= CLONAR ================= -->
+  <section class="block" id="clonar">
+    <div class="section-head">
+      <div class="num">9</div>
+      <div class="titles"><h2>Clonar: traer un repositorio a otra computadora</h2></div>
+    </div>
+    <div class="grid cols-2">
+      <div class="card">
+        <h3>git clone</h3>
+        <div class="cmd"><pre><code>cd E:\Development
+git clone https://github.com/&lt;usuario&gt;/mi-proyecto.git</code></pre><div class="what">Crea la carpeta <code>mi-proyecto</code> con todos los archivos y el historial completo, y ya queda conectada a <code>origin</code>. No hace falta <code>git init</code> ni <code>remote add</code>.</div></div>
+        <pre class="out"><code data-lang="plain">Cloning into 'mi-proyecto'...
+remote: Enumerating objects: 6, done.
+Receiving objects: 100% (6/6), done.</code></pre>
+        <div class="cmd"><pre><code>cd mi-proyecto
+git log --oneline</code></pre><div class="what">Entrás y ves el mismo historial que en la otra computadora.</div></div>
+      </div>
+      <div class="card">
+        <h3>Resumen: ¿init o clone?</h3>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Situación</th><th>Comando</th></tr></thead>
+            <tbody>
+              <tr><td>Empiezo un proyecto nuevo en mi PC</td><td><code>git init</code> + <code>remote add</code> + <code>push -u</code></td></tr>
+              <tr><td>El proyecto ya está en GitHub</td><td><code>git clone &lt;url&gt;</code></td></tr>
+              <tr><td>Quiero las novedades de un repo que ya cloné</td><td><code>git pull</code></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="callout tip"><span class="ico">✓</span><p>Siguiente paso: <a href="04-ramas.html">Ramas</a>, para trabajar en algo nuevo sin tocar lo que funciona.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="foot">
+    <a href="01-conceptos.html">← Conceptos</a>
+    <a href="03-uso-diario.html">Siguiente: Uso diario →</a>
+  </footer>
+</main>
+</body>
+</html>

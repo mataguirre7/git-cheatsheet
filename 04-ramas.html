@@ -1,0 +1,304 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Ramas en Git explicadas desde cero: crear, cambiar, merge, resolver conflictos, rebase y un flujo de trabajo con ramas.">
+<meta name="theme-color" content="#bc4c00">
+<title>Git · Ramas</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect x='4' y='4' width='56' height='56' rx='14' fill='%23bc4c00'/%3E%3Cg fill='none' stroke='%23fff' stroke-width='3.4' stroke-linecap='round'%3E%3Cpath d='M22 18v28'/%3E%3Cpath d='M22 30c0-6 20-4 20-12'/%3E%3C/g%3E%3Cg fill='%23fff'%3E%3Ccircle cx='22' cy='18' r='4.5'/%3E%3Ccircle cx='22' cy='46' r='4.5'/%3E%3Ccircle cx='42' cy='18' r='4.5'/%3E%3C/g%3E%3C/svg%3E">
+<link rel="stylesheet" href="assets/style.css">
+<script src="assets/app.js"></script>
+</head>
+<body data-page="ramas">
+<header class="topbar"></header>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <defs>
+    <marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="d-head"/></marker>
+  </defs>
+</svg>
+
+<main class="wrap">
+
+  <div class="hero">
+    <span class="eyebrow">Git · 04</span>
+    <h1>Ramas: trabajar en paralelo sin romper nada</h1>
+    <p class="lead">Una rama te deja probar una idea o desarrollar una función nueva aparte de la versión principal. Cuando está lista, la unís; si no sirvió, la borrás. Es la forma normal de trabajar con Git, aunque estés solo.</p>
+    <div class="toolbar">
+      <label class="search">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        <input id="q" type="search" placeholder="Buscar: crear rama, conflicto, merge, rebase, borrar…" autocomplete="off" aria-label="Buscar">
+        <span class="hint"><kbd>/</kbd></span>
+      </label>
+    </div>
+    <nav class="toc">
+      <a href="#que-es">Qué es una rama</a>
+      <a href="#comandos">Crear y moverse</a>
+      <a href="#merge">Unir ramas (merge)</a>
+      <a href="#conflictos">Conflictos</a>
+      <a href="#rebase">Rebase</a>
+      <a href="#flujo">Flujo de trabajo</a>
+    </nav>
+  </div>
+
+  <section class="terms-box">
+    <h2>Términos de esta página</h2>
+    <p>Las bases (commit, HEAD) están en <a href="01-conceptos.html">Conceptos</a>.</p>
+    <dl class="terms">
+      <dt>Rama (branch)</dt><dd>Un marcador con nombre que apunta a un commit y avanza solo cuando hacés commits nuevos estando en ella.</dd>
+      <dt>main</dt><dd>La rama principal por convención: la versión “buena” del proyecto.</dd>
+      <dt>Rama de función</dt><dd>Una rama corta para una sola tarea (<i>feature branch</i>), por ejemplo <code>agrega-login</code>. Se une a <code>main</code> y se borra.</dd>
+      <dt>Merge</dt><dd>Unir los commits de una rama dentro de otra.</dd>
+      <dt>Fast-forward</dt><dd>Un merge en el que la rama destino solo “avanza” hasta la otra, porque no tenía commits propios. No crea commit nuevo.</dd>
+      <dt>Commit de merge</dt><dd>Un commit especial con dos padres que se crea cuando las dos ramas avanzaron por separado.</dd>
+      <dt>Conflicto</dt><dd>Cuando las dos ramas cambiaron <b>las mismas líneas</b> de un archivo y Git no puede decidir solo cuál dejar. Te pide que elijas vos.</dd>
+      <dt>Rebase</dt><dd>Mover tus commits para que queden encima de otra rama, como si hubieras empezado desde ahí. Deja un historial en línea recta.</dd>
+      <dt>switch / checkout</dt><dd>Cambiar de rama. <code>git switch</code> es el comando moderno; <code>git checkout</code> es el viejo y hace muchas cosas más (por eso confunde).</dd>
+    </dl>
+  </section>
+
+  <!-- ================= QUE ES ================= -->
+  <section class="block" id="que-es">
+    <div class="section-head">
+      <div class="num">1</div>
+      <div class="titles"><h2>Qué es una rama</h2></div>
+    </div>
+    <div class="explain">
+      <p>Una rama no es una copia de los archivos: es solo un <b>nombre que apunta a un commit</b>. Por eso crearla es instantáneo. Cuando cambiás de rama, Git reemplaza los archivos de tu carpeta por los de esa rama. Cuando volvés, vuelven los otros.</p>
+      <p>En el dibujo, <code>main</code> siguió con el commit C mientras en <code>nueva-ruta</code> se hicieron D y E. Las dos líneas comparten A y B, y cada una tiene lo suyo. <b>HEAD</b> marca en cuál estás (acá, en <code>nueva-ruta</code>).</p>
+    </div>
+    <div class="diagram">
+      <div class="svg-scroll">
+      <svg viewBox="0 0 1000 220" role="img" aria-label="main tiene los commits A, B y C; la rama nueva-ruta sale de B y tiene D y E; HEAD apunta a nueva-ruta">
+        <path d="M110,150 L380,150" class="d-line" style="stroke-width:2.4"/>
+        <path d="M250,150 C320,150 320,70 400,70 L560,70" class="d-line s-vol" style="stroke-width:2.4"/>
+        <circle cx="110" cy="150" r="24" class="d-ok"/><text x="110" y="156" text-anchor="middle" class="d-code" style="font-weight:700">A</text>
+        <circle cx="250" cy="150" r="24" class="d-ok"/><text x="250" y="156" text-anchor="middle" class="d-code" style="font-weight:700">B</text>
+        <circle cx="400" cy="150" r="24" class="d-ok"/><text x="400" y="156" text-anchor="middle" class="d-code" style="font-weight:700">C</text>
+        <circle cx="420" cy="70" r="24" class="d-vol"/><text x="420" y="76" text-anchor="middle" class="d-code" style="font-weight:700">D</text>
+        <circle cx="560" cy="70" r="24" class="d-vol"/><text x="560" y="76" text-anchor="middle" class="d-code" style="font-weight:700">E</text>
+
+        <rect x="460" y="132" width="90" height="36" rx="8" class="d-plain"/>
+        <text x="505" y="155" text-anchor="middle" class="d-code" style="font-weight:700">main</text>
+        <path d="M460,150 L428,150" class="d-line" marker-end="url(#ah)"/>
+
+        <rect x="620" y="52" width="130" height="36" rx="8" class="d-vol"/>
+        <text x="685" y="75" text-anchor="middle" class="d-code" style="font-weight:700">nueva-ruta</text>
+        <path d="M620,70 L588,70" class="d-line s-vol" marker-end="url(#ah)"/>
+
+        <rect x="800" y="52" width="80" height="36" rx="8" class="d-plain"/>
+        <text x="840" y="75" text-anchor="middle" class="d-code" style="font-weight:700">HEAD</text>
+        <path d="M800,70 L754,70" class="d-line" marker-end="url(#ah)"/>
+
+        <text x="110" y="200" class="d-lbl">el tiempo avanza hacia la derecha →</text>
+      </svg>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= COMANDOS ================= -->
+  <section class="block" id="comandos" data-search>
+    <div class="section-head">
+      <div class="num">2</div>
+      <div class="titles"><h2>Crear, cambiar y borrar ramas</h2></div>
+    </div>
+    <div class="grid cols-2">
+      <div class="card">
+        <h3>Crear y cambiar</h3>
+        <div class="cmd"><pre><code>git switch -c nueva-ruta</code></pre><div class="what">Crea la rama <code>nueva-ruta</code> a partir del commit actual y se cambia a ella (<code>-c</code> = <i>create</i>). Es lo que vas a usar casi siempre.</div></div>
+        <div class="cmd"><pre><code>git switch main</code></pre><div class="what">Cambia a una rama que ya existe. Los archivos de la carpeta pasan a ser los de esa rama.</div></div>
+        <div class="cmd"><pre><code>git switch -</code></pre><div class="what">Vuelve a la rama anterior (como el “atrás” del navegador).</div></div>
+        <div class="callout info"><span class="ico">i</span><p>En tutoriales viejos vas a ver <code>git checkout -b nueva-ruta</code> y <code>git checkout main</code>: hacen lo mismo.</p></div>
+      </div>
+      <div class="card">
+        <h3>Ver, renombrar y borrar</h3>
+        <div class="cmd"><pre><code>git branch</code></pre><div class="what">Lista las ramas locales; la actual tiene <code>*</code>.</div></div>
+        <div class="cmd"><pre><code>git branch -a</code></pre><div class="what">Incluye las ramas del remoto (aparecen como <code>remotes/origin/...</code>).</div></div>
+        <div class="cmd"><pre><code>git branch -m nombre-nuevo</code></pre><div class="what">Renombra la rama actual.</div></div>
+        <div class="cmd"><pre><code>git branch -d nueva-ruta</code></pre><div class="what">Borra una rama que ya se unió. Si tiene commits sin unir, Git se niega para protegerte; <code>-D</code> la borra igual (se pierden esos commits).</div></div>
+        <div class="cmd"><pre><code>git push origin --delete nueva-ruta</code></pre><div class="what">Borra la rama en GitHub.</div></div>
+      </div>
+    </div>
+    <div class="callout warn"><span class="ico">!</span><p><b>Cambios sin commitear al cambiar de rama:</b> si tus cambios no chocan con la otra rama, viajan con vos. Si chocan, Git no te deja cambiar (<i>“Your local changes would be overwritten”</i>). Commiteá primero o guardalos con <code>git stash</code>.</p></div>
+  </section>
+
+  <!-- ================= MERGE ================= -->
+  <section class="block" id="merge" data-search>
+    <div class="section-head">
+      <div class="num">3</div>
+      <div class="titles"><h2>Unir ramas (merge)</h2></div>
+    </div>
+    <div class="explain">
+      <p>Para traer el trabajo de <code>nueva-ruta</code> a <code>main</code>: te parás en la rama <b>que recibe</b> los cambios y le decís qué rama unir.</p>
+    </div>
+    <div class="grid cols-2">
+      <div class="card">
+        <div class="cmd"><pre><code>git switch main
+git pull
+git merge nueva-ruta</code></pre><div class="what">1) Ir a la rama destino. 2) Traer lo último del remoto. 3) Unir <code>nueva-ruta</code> dentro de <code>main</code>.</div></div>
+        <div class="cmd"><pre><code>git push
+git branch -d nueva-ruta</code></pre><div class="what">Subir el resultado y borrar la rama, que ya no hace falta.</div></div>
+      </div>
+      <div class="card">
+        <h3>Qué podés ver al hacer merge</h3>
+        <ul>
+          <li><b>“Fast-forward”:</b> <code>main</code> no tenía commits nuevos; solo avanzó. Listo.</li>
+          <li><b>Se abre el editor</b> con “Merge branch 'nueva-ruta'”: las dos ramas avanzaron y Git crea un commit de merge. Guardá y cerrá el editor para aceptar el mensaje.</li>
+          <li><b>“CONFLICT”:</b> las dos ramas cambiaron las mismas líneas. Seguí la sección siguiente.</li>
+        </ul>
+      </div>
+    </div>
+    <div class="diagram" style="margin-top:16px">
+      <div class="svg-scroll">
+      <svg viewBox="0 0 1000 250" role="img" aria-label="Fast-forward: main avanza hasta el último commit de la rama. Merge con commit: se crea M con dos padres">
+        <text x="20" y="28" class="d-title">Fast-forward</text>
+        <text x="20" y="48" class="d-sub">main no tenía commits nuevos: solo avanza</text>
+        <path d="M60,130 L360,130" class="d-line" style="stroke-width:2.4"/>
+        <circle cx="60" cy="130" r="20" class="d-ok"/><text x="60" y="136" text-anchor="middle" class="d-code">A</text>
+        <circle cx="160" cy="130" r="20" class="d-ok"/><text x="160" y="136" text-anchor="middle" class="d-code">B</text>
+        <circle cx="260" cy="130" r="20" class="d-vol"/><text x="260" y="136" text-anchor="middle" class="d-code">D</text>
+        <circle cx="360" cy="130" r="20" class="d-vol"/><text x="360" y="136" text-anchor="middle" class="d-code">E</text>
+        <text x="160" y="186" text-anchor="middle" class="d-lbl">main (antes)</text>
+        <path d="M160,172 L160,154" class="d-line" style="stroke-dasharray:3 3" marker-end="url(#ah)"/>
+        <text x="360" y="186" text-anchor="middle" class="d-code" style="font-weight:700">main (después)</text>
+        <path d="M360,172 L360,154" class="d-line" marker-end="url(#ah)"/>
+
+        <path d="M490,20 L490,230" class="d-line" style="stroke-dasharray:3 6;stroke-width:1"/>
+
+        <text x="530" y="28" class="d-title">Merge con commit</text>
+        <text x="530" y="48" class="d-sub">las dos ramas avanzaron: se crea M con dos padres</text>
+        <path d="M560,160 L900,160" class="d-line" style="stroke-width:2.4"/>
+        <path d="M650,160 C700,160 700,95 740,95 L830,95 C870,95 870,160 900,160" class="d-line s-vol" style="stroke-width:2.4"/>
+        <circle cx="560" cy="160" r="20" class="d-ok"/><text x="560" y="166" text-anchor="middle" class="d-code">A</text>
+        <circle cx="650" cy="160" r="20" class="d-ok"/><text x="650" y="166" text-anchor="middle" class="d-code">B</text>
+        <circle cx="780" cy="160" r="20" class="d-ok"/><text x="780" y="166" text-anchor="middle" class="d-code">C</text>
+        <circle cx="760" cy="95" r="20" class="d-vol"/><text x="760" y="101" text-anchor="middle" class="d-code">D</text>
+        <circle cx="830" cy="95" r="20" class="d-vol"/><text x="830" y="101" text-anchor="middle" class="d-code">E</text>
+        <circle cx="910" cy="160" r="22" class="d-img"/><text x="910" y="166" text-anchor="middle" class="d-code" style="font-weight:700">M</text>
+        <text x="910" y="212" text-anchor="middle" class="d-code" style="font-weight:700">main</text>
+        <path d="M910,198 L910,186" class="d-line" marker-end="url(#ah)"/>
+      </svg>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= CONFLICTOS ================= -->
+  <section class="block" id="conflictos" data-search>
+    <div class="section-head">
+      <div class="num">4</div>
+      <div class="titles"><h2>Resolver un conflicto, paso a paso</h2><p>No es un error grave: Git solo necesita que decidas qué versión queda.</p></div>
+    </div>
+    <div class="grid cols-2">
+      <div class="card">
+        <h3>1. Qué ves</h3>
+        <pre class="out"><code data-lang="plain">Auto-merging app.js
+CONFLICT (content): Merge conflict in app.js
+Automatic merge failed; fix conflicts and then commit the result.</code></pre>
+        <div class="explain" style="margin-top:10px"><p>Git unió todo lo que pudo y dejó marcadas, <b>dentro del archivo</b>, las partes en conflicto:</p></div>
+        <pre><code data-lang="plain">&lt;&lt;&lt;&lt;&lt;&lt;&lt; HEAD
+const PORT = 3000;
+=======
+const PORT = process.env.PORT ?? 8080;
+&gt;&gt;&gt;&gt;&gt;&gt;&gt; nueva-ruta</code></pre>
+        <ul>
+          <li>Entre <code>&lt;&lt;&lt;&lt;&lt;&lt;&lt; HEAD</code> y <code>=======</code>: lo que tenía tu rama actual (<code>main</code>).</li>
+          <li>Entre <code>=======</code> y <code>&gt;&gt;&gt;&gt;&gt;&gt;&gt; nueva-ruta</code>: lo que traía la otra rama.</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>2. Cómo resolverlo</h3>
+        <ol class="steps">
+          <li>Corré <code>git status</code>: los archivos en conflicto aparecen como <i>both modified</i>.</li>
+          <li>Abrí cada archivo y dejá el código como tiene que quedar: una de las dos versiones, las dos o una mezcla. <b>Borrá las tres líneas de marcas</b> (<code>&lt;&lt;&lt;</code>, <code>===</code>, <code>&gt;&gt;&gt;</code>).</li>
+          <li>En VS Code aparecen botones arriba del conflicto: <b>Accept Current</b> (lo tuyo), <b>Accept Incoming</b> (lo de la otra rama), <b>Accept Both</b> (ambos).</li>
+          <li>Marcá cada archivo como resuelto: <code>git add app.js</code>.</li>
+          <li>Terminá el merge: <code>git commit</code> (Git propone el mensaje; guardá y cerrá el editor).</li>
+        </ol>
+        <div class="cmd"><pre><code>git merge --abort</code></pre><div class="what">¿Te arrepentiste? Cancela el merge y deja todo como estaba antes de empezar.</div></div>
+        <div class="callout tip"><span class="ico">✓</span><p>Para tener menos conflictos: ramas cortas, <code>git pull</code> seguido y commits chicos.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= REBASE ================= -->
+  <section class="block" id="rebase" data-search>
+    <div class="section-head">
+      <div class="num">5</div>
+      <div class="titles"><h2>Rebase: la alternativa al merge</h2></div>
+    </div>
+    <div class="explain">
+      <p><code>rebase</code> toma los commits de tu rama y los “vuelve a aplicar” encima del último commit de otra. El resultado es el mismo código, pero el historial queda en línea recta, sin commits de merge. Los commits movidos son <b>commits nuevos</b> (cambia su hash): D y E pasan a ser D′ y E′.</p>
+    </div>
+    <div class="diagram">
+      <div class="svg-scroll">
+      <svg viewBox="0 0 1000 200" role="img" aria-label="Antes: la rama sale de B con D y E. Después del rebase: D' y E' quedan después de C">
+        <text x="20" y="28" class="d-title">Antes</text>
+        <path d="M60,140 L300,140" class="d-line" style="stroke-width:2.4"/>
+        <path d="M160,140 C200,140 200,75 240,75 L340,75" class="d-line s-vol" style="stroke-width:2.4"/>
+        <circle cx="60" cy="140" r="20" class="d-ok"/><text x="60" y="146" text-anchor="middle" class="d-code">A</text>
+        <circle cx="160" cy="140" r="20" class="d-ok"/><text x="160" y="146" text-anchor="middle" class="d-code">B</text>
+        <circle cx="290" cy="140" r="20" class="d-ok"/><text x="290" y="146" text-anchor="middle" class="d-code">C</text>
+        <circle cx="250" cy="75" r="20" class="d-vol"/><text x="250" y="81" text-anchor="middle" class="d-code">D</text>
+        <circle cx="340" cy="75" r="20" class="d-vol"/><text x="340" y="81" text-anchor="middle" class="d-code">E</text>
+        <text x="290" y="186" text-anchor="middle" class="d-lbl">main</text>
+        <text x="390" y="80" class="d-lbl">mi-rama</text>
+
+        <path d="M470,110 L540,110" class="d-line" marker-end="url(#ah)"/>
+        <text x="505" y="98" text-anchor="middle" class="d-code">rebase main</text>
+
+        <text x="580" y="28" class="d-title">Después</text>
+        <path d="M600,140 L960,140" class="d-line" style="stroke-width:2.4"/>
+        <circle cx="610" cy="140" r="20" class="d-ok"/><text x="610" y="146" text-anchor="middle" class="d-code">A</text>
+        <circle cx="690" cy="140" r="20" class="d-ok"/><text x="690" y="146" text-anchor="middle" class="d-code">B</text>
+        <circle cx="770" cy="140" r="20" class="d-ok"/><text x="770" y="146" text-anchor="middle" class="d-code">C</text>
+        <circle cx="850" cy="140" r="20" class="d-vol"/><text x="850" y="146" text-anchor="middle" class="d-code">D′</text>
+        <circle cx="930" cy="140" r="20" class="d-vol"/><text x="930" y="146" text-anchor="middle" class="d-code">E′</text>
+        <text x="770" y="186" text-anchor="middle" class="d-lbl">main</text>
+        <text x="930" y="186" text-anchor="middle" class="d-lbl">mi-rama</text>
+      </svg>
+      </div>
+    </div>
+    <div class="grid cols-2" style="margin-top:16px">
+      <div class="card">
+        <div class="cmd"><pre><code>git switch mi-rama
+git rebase main</code></pre><div class="what">Pone tus commits de <code>mi-rama</code> encima de lo último de <code>main</code>. Si hay conflictos, se resuelven como en un merge, pero se continúa con <code>git rebase --continue</code> (o se cancela con <code>git rebase --abort</code>).</div></div>
+        <div class="cmd"><pre><code>git pull --rebase</code></pre><div class="what">Trae lo del remoto y pone tus commits locales encima, en vez de crear un commit de merge.</div></div>
+      </div>
+      <div class="card">
+        <h3>La regla de oro</h3>
+        <div class="callout bad"><span class="ico">✕</span><p><b>No hagas rebase de commits que ya subiste a una rama que usan otras personas.</b> Como el rebase crea commits nuevos, los demás tendrían un historial distinto al tuyo y se arma un lío.</p></div>
+        <p style="margin-top:10px">Si tenés dudas, usá <code>merge</code>: siempre es seguro. El rebase es una preferencia de prolijidad, no una obligación.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= FLUJO ================= -->
+  <section class="block" id="flujo" data-search>
+    <div class="section-head">
+      <div class="num">6</div>
+      <div class="titles"><h2>Un flujo de trabajo con ramas</h2><p>El que usan la mayoría de los equipos (y que conviene usar solo también).</p></div>
+    </div>
+    <div class="card">
+      <ol class="steps">
+        <li>Partí de <code>main</code> actualizado: <code>git switch main</code> y <code>git pull</code>.</li>
+        <li>Creá una rama por tarea: <code>git switch -c agrega-health</code>.</li>
+        <li>Trabajá y commiteá en esa rama todas las veces que quieras.</li>
+        <li>Subila: <code>git push -u origin agrega-health</code> (la primera vez con <code>-u</code>).</li>
+        <li>En GitHub, abrí un <b>Pull Request</b> de <code>agrega-health</code> hacia <code>main</code> para revisar los cambios (ver <a href="05-github.html#pr">GitHub y remotos</a>).</li>
+        <li>Cuando está aprobado, se hace el merge en GitHub (botón <b>Merge pull request</b>).</li>
+        <li>En tu PC: <code>git switch main</code>, <code>git pull</code> y <code>git branch -d agrega-health</code>.</li>
+      </ol>
+      <div class="callout info"><span class="ico">i</span><p>Con este flujo, <code>main</code> siempre tiene código que funciona, y si algo sale mal en una rama no afecta a nadie más. Además, si conectaste el repo a Netlify, cada merge a <code>main</code> publica el sitio solo.</p></div>
+    </div>
+  </section>
+
+  <p class="empty">No encontré resultados.</p>
+
+  <footer class="foot">
+    <a href="03-uso-diario.html">← Uso diario</a>
+    <a href="05-github.html">Siguiente: GitHub y remotos →</a>
+  </footer>
+</main>
+</body>
+</html>

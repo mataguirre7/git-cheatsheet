@@ -1,0 +1,278 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Trabajar con GitHub desde Git explicado: remotos, fetch, pull y push, pull requests, forks, autenticación por HTTPS o SSH y publicar en Netlify.">
+<meta name="theme-color" content="#bc4c00">
+<title>Git · GitHub y remotos</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect x='4' y='4' width='56' height='56' rx='14' fill='%23bc4c00'/%3E%3Cg fill='none' stroke='%23fff' stroke-width='3.4' stroke-linecap='round'%3E%3Cpath d='M22 18v28'/%3E%3Cpath d='M22 30c0-6 20-4 20-12'/%3E%3C/g%3E%3Cg fill='%23fff'%3E%3Ccircle cx='22' cy='18' r='4.5'/%3E%3Ccircle cx='22' cy='46' r='4.5'/%3E%3Ccircle cx='42' cy='18' r='4.5'/%3E%3C/g%3E%3C/svg%3E">
+<link rel="stylesheet" href="assets/style.css">
+<script src="assets/app.js"></script>
+</head>
+<body data-page="github">
+<header class="topbar"></header>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <defs>
+    <marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="d-head"/></marker>
+    <marker id="ah-img" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="f-img"/></marker>
+    <marker id="ah-ok" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="f-ok"/></marker>
+  </defs>
+</svg>
+
+<main class="wrap">
+
+  <div class="hero">
+    <span class="eyebrow">Git · 05</span>
+    <h1>GitHub y repositorios remotos</h1>
+    <p class="lead">Cómo sincronizar tu repositorio local con GitHub, colaborar con otras personas mediante pull requests, iniciar sesión de forma segura y publicar un sitio a partir del repo.</p>
+    <div class="toolbar">
+      <label class="search">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        <input id="q" type="search" placeholder="Buscar: push, pull request, fork, SSH, token, Netlify…" autocomplete="off" aria-label="Buscar">
+        <span class="hint"><kbd>/</kbd></span>
+      </label>
+    </div>
+    <nav class="toc">
+      <a href="#remotos">Remotos</a>
+      <a href="#sincronizar">fetch, pull y push</a>
+      <a href="#pr">Pull requests</a>
+      <a href="#fork">Forks</a>
+      <a href="#acceso">Iniciar sesión</a>
+      <a href="#netlify">Publicar en Netlify</a>
+      <a href="#archivos">Archivos estándar</a>
+    </nav>
+  </div>
+
+  <section class="terms-box">
+    <h2>Términos de esta página</h2>
+    <dl class="terms">
+      <dt>Remoto</dt><dd>Otra copia del repositorio, guardada en un servidor (GitHub). Tu repo local puede tener varios; cada uno tiene un nombre y una URL.</dd>
+      <dt>origin</dt><dd>El nombre por defecto del remoto principal (el que se crea al clonar o con <code>git remote add origin</code>).</dd>
+      <dt>origin/main</dt><dd>Una copia de referencia, <b>en tu PC</b>, de cómo estaba <code>main</code> en GitHub la última vez que preguntaste. Se actualiza con <code>fetch</code> o <code>pull</code>.</dd>
+      <dt>fetch</dt><dd>Descargar las novedades del remoto <b>sin tocar</b> tus archivos ni tus ramas.</dd>
+      <dt>pull</dt><dd><code>fetch</code> + unir esas novedades a tu rama actual.</dd>
+      <dt>push</dt><dd>Subir tus commits locales al remoto.</dd>
+      <dt>Pull request (PR)</dt><dd>En GitHub, un pedido para unir una rama a otra. Muestra los cambios, permite comentarlos y aprobarlos antes del merge.</dd>
+      <dt>Fork</dt><dd>Tu propia copia, en tu cuenta de GitHub, del repositorio de otra persona. Sirve para proponer cambios a proyectos en los que no tenés permiso de escritura.</dd>
+      <dt>HTTPS / SSH</dt><dd>Dos formas de conectarse a GitHub. HTTPS usa tu sesión (o un token); SSH usa un par de claves guardado en tu PC.</dd>
+      <dt>Token (PAT)</dt><dd><i>Personal Access Token</i>: una contraseña especial, generada en GitHub, con permisos y vencimiento, que se usa en lugar de tu contraseña real.</dd>
+    </dl>
+  </section>
+
+  <!-- ================= REMOTOS ================= -->
+  <section class="block" id="remotos" data-search>
+    <div class="section-head">
+      <div class="num">1</div>
+      <div class="titles"><h2>Ver y configurar remotos</h2></div>
+    </div>
+    <div class="grid cols-2">
+      <div class="card">
+        <div class="cmd"><pre><code>git remote -v</code></pre><div class="what">Lista los remotos y sus URLs (una para bajar, <i>fetch</i>, y otra para subir, <i>push</i>; normalmente iguales).</div></div>
+        <pre class="out"><code data-lang="plain">origin  https://github.com/mataguirre7/docker-cheatsheet.git (fetch)
+origin  https://github.com/mataguirre7/docker-cheatsheet.git (push)</code></pre>
+        <div class="cmd"><pre><code>git remote add origin https://github.com/&lt;usuario&gt;/&lt;repo&gt;.git</code></pre><div class="what">Conecta un repo local con uno de GitHub. Si ya existe <code>origin</code>, da error: usá <code>set-url</code>.</div></div>
+      </div>
+      <div class="card">
+        <div class="cmd"><pre><code>git remote set-url origin https://github.com/&lt;usuario&gt;/&lt;nuevo-nombre&gt;.git</code></pre><div class="what">Cambia la URL (por ejemplo, si renombraste el repo en GitHub o pasás de HTTPS a SSH).</div></div>
+        <div class="cmd"><pre><code>git remote rename origin github
+git remote remove github</code></pre><div class="what">Renombrar o quitar un remoto. Quitarlo no borra nada en GitHub: solo desconecta tu copia local.</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= SINCRONIZAR ================= -->
+  <section class="block" id="sincronizar" data-search>
+    <div class="section-head">
+      <div class="num">2</div>
+      <div class="titles"><h2>fetch, pull y push</h2></div>
+    </div>
+    <div class="explain">
+      <p>Tu PC guarda una “foto” de cómo estaban las ramas de GitHub: <code>origin/main</code>. Esa foto <b>no se actualiza sola</b>: por eso <code>git status</code> puede decir “up to date” aunque alguien haya subido cambios. <code>fetch</code> actualiza la foto; <code>pull</code> además la une a tu rama; <code>push</code> manda tus commits para allá.</p>
+    </div>
+    <div class="diagram">
+      <div class="svg-scroll">
+      <svg viewBox="0 0 1000 280" role="img" aria-label="fetch baja de GitHub a origin/main; merge une origin/main con main; pull hace las dos cosas; push sube main a GitHub">
+        <text x="20" y="28" class="d-title">Tu computadora</text>
+        <rect x="20" y="40" width="560" height="200" rx="12" class="d-area"/>
+
+        <rect x="50" y="100" width="210" height="80" rx="10" class="d-ok"/>
+        <text x="155" y="134" text-anchor="middle" class="d-code" style="font-weight:700">main</text>
+        <text x="155" y="158" text-anchor="middle" class="d-sub">tu rama, tus commits</text>
+
+        <rect x="340" y="100" width="210" height="80" rx="10" class="d-box"/>
+        <text x="445" y="134" text-anchor="middle" class="d-code" style="font-weight:700">origin/main</text>
+        <text x="445" y="158" text-anchor="middle" class="d-sub">foto de GitHub (solo lectura)</text>
+
+        <rect x="740" y="100" width="240" height="80" rx="10" class="d-img"/>
+        <text x="860" y="134" text-anchor="middle" class="d-title">GitHub</text>
+        <text x="860" y="158" text-anchor="middle" class="d-sub">main en origin</text>
+
+        <path d="M736,150 L554,150" class="d-line s-img" marker-end="url(#ah-img)"/>
+        <text x="645" y="172" text-anchor="middle" class="d-code" style="font-weight:700">git fetch</text>
+        <path d="M336,150 L264,150" class="d-line s-ok" marker-end="url(#ah-ok)"/>
+        <text x="300" y="172" text-anchor="middle" class="d-code" style="font-weight:700">merge</text>
+
+        <path d="M264,206 L736,206" class="d-line" style="stroke-dasharray:3 4"/>
+        <text x="500" y="228" text-anchor="middle" class="d-code" style="font-weight:700">git pull = fetch + merge</text>
+
+        <path d="M155,100 C155,60 860,60 860,96" class="d-line s-img" style="stroke-width:2.2" marker-end="url(#ah-img)"/>
+        <text x="500" y="56" text-anchor="middle" class="d-code" style="font-weight:700">git push</text>
+        <text x="500" y="268" text-anchor="middle" class="d-sub">fetch nunca toca tus archivos · pull sí · push solo sube commits (no archivos sin commitear)</text>
+      </svg>
+      </div>
+    </div>
+    <div class="grid cols-2" style="margin-top:16px">
+      <div class="card">
+        <h3>Traer cambios</h3>
+        <div class="cmd"><pre><code>git fetch</code></pre><div class="what">Descarga novedades de todas las ramas del remoto. Después, <code>git status</code> te dice si estás atrás (<i>behind</i>) o adelante (<i>ahead</i>).</div></div>
+        <div class="cmd"><pre><code>git log --oneline main..origin/main</code></pre><div class="what">Qué commits hay en GitHub que todavía no tenés.</div></div>
+        <div class="cmd"><pre><code>git pull</code></pre><div class="what">Trae y une a tu rama actual. Hacelo al empezar a trabajar.</div></div>
+      </div>
+      <div class="card">
+        <h3>Subir cambios</h3>
+        <div class="cmd"><pre><code>git push</code></pre><div class="what">Sube los commits de la rama actual a su rama en el remoto (si ya tiene <i>upstream</i>).</div></div>
+        <div class="cmd"><pre><code>git push -u origin mi-rama</code></pre><div class="what">La primera vez que subís una rama nueva: la crea en GitHub y la deja emparejada.</div></div>
+        <div class="callout warn"><span class="ico">!</span><p>Si el push es <b>rechazado</b> (<i>“rejected… fetch first”</i>), alguien subió commits que no tenés. Hacé <code>git pull</code>, resolvé conflictos si aparecen y volvé a hacer <code>git push</code>.</p></div>
+        <div class="callout bad"><span class="ico">✕</span><p><code>git push --force</code> pisa lo que haya en GitHub y puede borrar trabajo ajeno. Si alguna vez lo necesitás (después de un rebase en tu propia rama), usá <code>git push --force-with-lease</code>, que se frena si hay algo que no viste.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= PR ================= -->
+  <section class="block" id="pr" data-search>
+    <div class="section-head">
+      <div class="num">3</div>
+      <div class="titles"><h2>Pull requests: revisar antes de unir</h2></div>
+    </div>
+    <div class="explain"><p>Un pull request (PR) no es un comando de Git: es una página de GitHub donde se proponen los cambios de una rama para unirlos a otra. Ahí se ven los diffs, se comenta línea por línea y se aprueba. Es la forma estándar de trabajar en equipo, y también sirve solo, para revisar tus propios cambios antes de llevarlos a <code>main</code>.</p></div>
+    <div class="grid cols-2">
+      <div class="card">
+        <h3>Crear un PR</h3>
+        <ol class="steps">
+          <li>En tu PC: <code>git switch -c mejora-readme</code>, hacé tus commits y <code>git push -u origin mejora-readme</code>.</li>
+          <li>Entrá al repo en GitHub: aparece un aviso amarillo “<i>mejora-readme had recent pushes</i>” con el botón <b>Compare &amp; pull request</b>.</li>
+          <li>Revisá que diga <code>base: main</code> ← <code>compare: mejora-readme</code>.</li>
+          <li>Escribí un título y una descripción de qué cambia y por qué → <b>Create pull request</b>.</li>
+        </ol>
+      </div>
+      <div class="card">
+        <h3>Revisar y unir</h3>
+        <ol class="steps">
+          <li>Pestaña <b>Files changed</b>: los cambios línea por línea. Se puede comentar cada línea.</li>
+          <li>Si hay que corregir algo, hacés más commits en la misma rama y <code>git push</code>: el PR se actualiza solo.</li>
+          <li>Cuando está listo: <b>Merge pull request</b> → <b>Confirm merge</b>. GitHub ofrece borrar la rama: aceptá.</li>
+          <li>En tu PC: <code>git switch main</code>, <code>git pull</code>, <code>git branch -d mejora-readme</code>.</li>
+        </ol>
+        <div class="callout info"><span class="ico">i</span><p>Si GitHub dice <i>“This branch has conflicts”</i>, resolvelos en tu PC: <code>git switch mejora-readme</code>, <code>git merge main</code>, resolvés, commit y push.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= FORK ================= -->
+  <section class="block" id="fork" data-search>
+    <div class="section-head">
+      <div class="num">4</div>
+      <div class="titles"><h2>Contribuir a un repo ajeno (fork)</h2></div>
+    </div>
+    <div class="card">
+      <ol class="steps">
+        <li>En el repo de la otra persona, botón <b>Fork</b>: se crea una copia en tu cuenta (<code>github.com/&lt;tu-usuario&gt;/&lt;repo&gt;</code>).</li>
+        <li>Cloná <b>tu</b> copia: <code>git clone https://github.com/&lt;tu-usuario&gt;/&lt;repo&gt;.git</code>.</li>
+        <li>Agregá el original como segundo remoto, para traer sus novedades: <code>git remote add upstream https://github.com/&lt;dueño&gt;/&lt;repo&gt;.git</code>.</li>
+        <li>Rama nueva, commits y <code>git push -u origin mi-cambio</code> (a tu fork).</li>
+        <li>En GitHub, abrí el PR desde tu fork hacia el repo original.</li>
+        <li>Para actualizar tu copia más adelante: <code>git fetch upstream</code> y <code>git merge upstream/main</code>.</li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- ================= ACCESO ================= -->
+  <section class="block" id="acceso" data-search>
+    <div class="section-head">
+      <div class="num">5</div>
+      <div class="titles"><h2>Iniciar sesión en GitHub desde Git</h2><p>GitHub no acepta tu contraseña de la web para <code>git push</code>. Hay tres formas válidas.</p></div>
+    </div>
+    <div class="grid cols-3">
+      <div class="card">
+        <h3>A. Navegador (lo más fácil)</h3>
+        <p>Con Git para Windows viene el <b>Git Credential Manager</b>. En el primer <code>push</code> abre una ventana: <b>Sign in with your browser</b> → autorizás en GitHub → listo. Queda guardado en el Administrador de credenciales de Windows.</p>
+        <div class="cmd"><pre><code>git config --global credential.helper</code></pre><div class="what">Debería decir <code>manager</code>. Si no dice nada: <code>git config --global credential.helper manager</code>.</div></div>
+      </div>
+      <div class="card">
+        <h3>B. Token personal (PAT)</h3>
+        <ol class="steps">
+          <li>GitHub → tu foto → <b>Settings</b> → <b>Developer settings</b> → <b>Personal access tokens</b> → <b>Fine-grained tokens</b> → <b>Generate new token</b>.</li>
+          <li>Elegí vencimiento, los repos y el permiso <b>Contents: Read and write</b>.</li>
+          <li>Copiá el token (se muestra una sola vez) y usalo como “contraseña” cuando Git la pida.</li>
+        </ol>
+        <div class="callout warn"><span class="ico">!</span><p>Tratalo como una contraseña: nunca lo pegues en un archivo del repo.</p></div>
+      </div>
+      <div class="card">
+        <h3>C. Clave SSH</h3>
+        <div class="cmd"><pre><code>ssh-keygen -t ed25519 -C "&lt;tu-email&gt;"</code></pre><div class="what">Crea un par de claves en <code>~/.ssh/</code>. Aceptá la ruta con <kbd>Enter</kbd> (podés ponerle una frase de seguridad).</div></div>
+        <div class="cmd"><pre><code>Get-Content ~/.ssh/id_ed25519.pub</code></pre><div class="what">Muestra la clave <b>pública</b>. Copiala en GitHub → Settings → <b>SSH and GPG keys</b> → <b>New SSH key</b>.</div></div>
+        <div class="cmd"><pre><code>ssh -T git@github.com</code></pre><div class="what">Prueba: tiene que decir “<i>Hi &lt;usuario&gt;! You've successfully authenticated</i>”. Después usá URLs del tipo <code>git@github.com:&lt;usuario&gt;/&lt;repo&gt;.git</code>.</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= NETLIFY ================= -->
+  <section class="block" id="netlify" data-search>
+    <div class="section-head">
+      <div class="num">6</div>
+      <div class="titles"><h2>Publicar un sitio en Netlify desde GitHub</h2><p>Para sitios estáticos (HTML, CSS, JS), como estas cheatsheets.</p></div>
+    </div>
+    <div class="grid cols-2">
+      <div class="card">
+        <h3>Conectar una vez</h3>
+        <ol class="steps">
+          <li>Subí el sitio a un repo de GitHub (pasos 6 y 7 de <a href="02-primeros-pasos.html">Primeros pasos</a>).</li>
+          <li>Entrá a <code>app.netlify.com</code> e iniciá sesión con tu cuenta de GitHub.</li>
+          <li><b>Add new site → Import an existing project → GitHub</b>. La primera vez, autorizá a Netlify a ver tus repos (podés limitarlo a algunos).</li>
+          <li>Elegí el repo. En <b>Build command</b> dejá vacío y en <b>Publish directory</b> poné <code>.</code> (o lo que diga el <code>netlify.toml</code> del repo).</li>
+          <li><b>Deploy</b>. En segundos te da una URL del tipo <code>https://nombre-al-azar.netlify.app</code>; se puede cambiar en <b>Site configuration → Change site name</b>.</li>
+        </ol>
+      </div>
+      <div class="card">
+        <h3>Después: publicar = hacer push</h3>
+        <div class="explain"><p>Netlify queda “mirando” la rama <code>main</code>. Cada vez que hacés <code>git push</code> a <code>main</code> (o se mergea un PR), vuelve a publicar el sitio solo.</p></div>
+        <div class="cmd"><pre><code>git add .
+git commit -m "Actualiza la hoja de comandos"
+git push</code></pre><div class="what">Uno o dos minutos después, el cambio está online. En Netlify, la pestaña <b>Deploys</b> muestra cada publicación y su estado.</div></div>
+        <div class="callout tip"><span class="ico">✓</span><p>Los PRs también generan un <b>Deploy Preview</b>: una URL temporal para ver el cambio antes de unirlo.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= ARCHIVOS ================= -->
+  <section class="block" id="archivos" data-search>
+    <div class="section-head">
+      <div class="num">7</div>
+      <div class="titles"><h2>Archivos que todo repo debería tener</h2></div>
+    </div>
+    <div class="card">
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Archivo</th><th>Para qué</th></tr></thead>
+          <tbody>
+            <tr><td><code>README.md</code></td><td>La portada del repo en GitHub: qué es el proyecto, cómo instalarlo y usarlo. Se escribe en Markdown (<code>#</code> títulos, <code>-</code> listas, <code>```</code> bloques de código).</td></tr>
+            <tr><td><code>.gitignore</code></td><td>Qué no debe entrar en el repo (dependencias, secretos, archivos generados).</td></tr>
+            <tr><td><code>LICENSE</code></td><td>Qué pueden hacer otros con tu código. Sin licencia, legalmente nadie puede reutilizarlo. GitHub tiene plantillas (MIT es la más simple).</td></tr>
+            <tr><td><code>.gitattributes</code></td><td>Opcional: reglas por tipo de archivo, por ejemplo fines de línea (<code>* text=auto</code>).</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <p class="empty">No encontré resultados.</p>
+
+  <footer class="foot">
+    <a href="04-ramas.html">← Ramas</a>
+    <a href="06-deshacer.html">Siguiente: Deshacer cambios →</a>
+  </footer>
+</main>
+</body>
+</html>

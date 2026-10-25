@@ -1,0 +1,261 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Cómo deshacer cambios en Git sin miedo: restore, amend, reset, revert, clean y recuperar commits perdidos con reflog.">
+<meta name="theme-color" content="#bc4c00">
+<title>Git · Deshacer cambios</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect x='4' y='4' width='56' height='56' rx='14' fill='%23bc4c00'/%3E%3Cg fill='none' stroke='%23fff' stroke-width='3.4' stroke-linecap='round'%3E%3Cpath d='M22 18v28'/%3E%3Cpath d='M22 30c0-6 20-4 20-12'/%3E%3C/g%3E%3Cg fill='%23fff'%3E%3Ccircle cx='22' cy='18' r='4.5'/%3E%3Ccircle cx='22' cy='46' r='4.5'/%3E%3Ccircle cx='42' cy='18' r='4.5'/%3E%3C/g%3E%3C/svg%3E">
+<link rel="stylesheet" href="assets/style.css">
+<script src="assets/app.js"></script>
+</head>
+<body data-page="deshacer">
+<header class="topbar"></header>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <defs>
+    <marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="d-head"/></marker>
+  </defs>
+</svg>
+
+<main class="wrap">
+
+  <div class="hero">
+    <span class="eyebrow">Git · 06</span>
+    <h1>Deshacer cambios sin miedo</h1>
+    <p class="lead">Casi todo en Git se puede deshacer. La clave es saber <b>dónde está</b> lo que querés deshacer (sin preparar, preparado, commiteado o ya subido) y elegir el comando adecuado. Esta página empieza con una tabla para decidir.</p>
+    <div class="toolbar">
+      <label class="search">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        <input id="q" type="search" placeholder="Buscar: descartar, último commit, reset, revert, recuperar…" autocomplete="off" aria-label="Buscar">
+        <span class="hint"><kbd>/</kbd></span>
+      </label>
+    </div>
+    <nav class="toc">
+      <a href="#decidir">Qué comando usar</a>
+      <a href="#sin-commit">Cambios sin commitear</a>
+      <a href="#ultimo">El último commit</a>
+      <a href="#reset">reset</a>
+      <a href="#revert">revert</a>
+      <a href="#reflog">Recuperar con reflog</a>
+      <a href="#viejo">Versiones viejas</a>
+    </nav>
+  </div>
+
+  <section class="terms-box">
+    <h2>Términos de esta página</h2>
+    <dl class="terms">
+      <dt>Descartar</dt><dd>Tirar cambios que no commiteaste. Lo descartado que nunca estuvo en un commit <b>no se puede recuperar</b>.</dd>
+      <dt>HEAD~1</dt><dd>“El commit anterior a donde estoy”. <code>HEAD~2</code> es dos atrás, y así. También se puede usar un hash: <code>a1f3c9e</code>.</dd>
+      <dt>restore</dt><dd>Devuelve archivos a como estaban en el último commit (o en el que indiques). No toca el historial.</dd>
+      <dt>reset</dt><dd>Mueve la rama hacia atrás, a un commit anterior. Según el modo, los cambios de los commits “sacados” quedan preparados, sin preparar o se pierden.</dd>
+      <dt>revert</dt><dd>Crea un commit <b>nuevo</b> que hace lo contrario de otro. No borra nada del historial: es la forma segura de deshacer algo ya subido.</dd>
+      <dt>amend</dt><dd>Reemplazar el último commit por uno corregido.</dd>
+      <dt>Reescribir el historial</dt><dd>Cambiar o quitar commits que ya existen (<code>amend</code>, <code>reset</code>, <code>rebase</code>). Está bien en commits locales; es problemático en commits ya subidos que otros usan.</dd>
+      <dt>reflog</dt><dd>Un registro local de todos los lugares por donde pasó HEAD. Permite recuperar commits que parecen perdidos.</dd>
+    </dl>
+  </section>
+
+  <!-- ================= DECIDIR ================= -->
+  <section class="block" id="decidir" data-search>
+    <div class="section-head">
+      <div class="num">1</div>
+      <div class="titles"><h2>¿Qué comando uso?</h2></div>
+    </div>
+    <div class="card">
+      <h3>Tabla de decisión</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Quiero…</th><th>Comando</th><th>¿Se pierde algo?</th><th>¿Sirve si ya hice push?</th></tr></thead>
+          <tbody>
+            <tr><td>Descartar los cambios de un archivo</td><td><code>git restore archivo</code></td><td>Sí, esos cambios</td><td>— (no hay commit)</td></tr>
+            <tr><td>Sacar un archivo del área de preparación</td><td><code>git restore --staged archivo</code></td><td>No</td><td>—</td></tr>
+            <tr><td>Corregir el mensaje del último commit o sumarle un archivo</td><td><code>git commit --amend</code></td><td>No</td><td>No</td></tr>
+            <tr><td>Deshacer el último commit pero conservar los cambios</td><td><code>git reset --soft HEAD~1</code></td><td>No</td><td>No</td></tr>
+            <tr><td>Volver la rama a un commit y tirar todo lo posterior</td><td><code>git reset --hard &lt;hash&gt;</code></td><td><b>Sí</b></td><td>No</td></tr>
+            <tr><td>Deshacer un commit que ya está en GitHub</td><td><code>git revert &lt;hash&gt;</code></td><td>No (queda en el historial)</td><td><b>Sí</b></td></tr>
+            <tr><td>Recuperar un archivo como estaba en un commit viejo</td><td><code>git restore --source &lt;hash&gt; archivo</code></td><td>Los cambios actuales de ese archivo</td><td>Sí</td></tr>
+            <tr><td>Recuperar un commit que “se perdió” tras un reset</td><td><code>git reflog</code> + <code>git reset --hard &lt;hash&gt;</code></td><td>No</td><td>—</td></tr>
+            <tr><td>Borrar archivos nuevos que no están en Git</td><td><code>git clean -n</code> y luego <code>-f</code></td><td><b>Sí</b></td><td>—</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="callout tip"><span class="ico">✓</span><p>Ante la duda, antes de algo destructivo, hacé una rama de respaldo: <code>git branch respaldo</code>. Si algo sale mal, tus commits siguen ahí.</p></div>
+    </div>
+  </section>
+
+  <!-- ================= SIN COMMIT ================= -->
+  <section class="block" id="sin-commit" data-search>
+    <div class="section-head">
+      <div class="num">2</div>
+      <div class="titles"><h2>Cambios que todavía no commiteaste</h2></div>
+    </div>
+    <div class="grid cols-2">
+      <div class="card">
+        <h3>Descartar modificaciones</h3>
+        <div class="cmd"><pre><code>git restore app.js</code></pre><div class="what">Devuelve <code>app.js</code> a como estaba en el último commit. Lo que habías cambiado se pierde.</div></div>
+        <div class="cmd"><pre><code>git restore .</code></pre><div class="what">Lo mismo para todos los archivos modificados de la carpeta.</div></div>
+        <div class="callout bad"><span class="ico">✕</span><p>Lo descartado con <code>restore</code> no pasa por ninguna papelera. Si no estás seguro, primero <code>git stash</code> (lo guarda) en vez de descartarlo.</p></div>
+      </div>
+      <div class="card">
+        <h3>Despreparar y limpiar</h3>
+        <div class="cmd"><pre><code>git restore --staged app.js</code></pre><div class="what">Deshace un <code>git add</code>: el archivo deja de estar preparado, pero tus cambios siguen en el archivo.</div></div>
+        <div class="cmd"><pre><code>git clean -n</code></pre><div class="what">Muestra qué archivos <b>sin seguimiento</b> (nuevos, que Git no conoce) borraría. Solo muestra.</div></div>
+        <div class="cmd"><pre><code>git clean -f</code></pre><div class="what">Los borra de verdad. Con <code>-d</code> incluye carpetas. Los ignorados por <code>.gitignore</code> no se tocan (salvo con <code>-x</code>).</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= ULTIMO ================= -->
+  <section class="block" id="ultimo" data-search>
+    <div class="section-head">
+      <div class="num">3</div>
+      <div class="titles"><h2>Arreglar el último commit</h2><p>Solo si todavía no hiciste <code>push</code> de ese commit.</p></div>
+    </div>
+    <div class="grid cols-2">
+      <div class="card">
+        <h3>Me equivoqué en el mensaje</h3>
+        <div class="cmd"><pre><code>git commit --amend -m "Mensaje correcto"</code></pre><div class="what">Reemplaza el último commit por uno igual con el mensaje nuevo.</div></div>
+        <h3 style="margin-top:12px">Me olvidé un archivo</h3>
+        <div class="cmd"><pre><code>git add archivo-olvidado.js
+git commit --amend --no-edit</code></pre><div class="what">Suma el archivo al último commit. <code>--no-edit</code> conserva el mensaje.</div></div>
+      </div>
+      <div class="card">
+        <h3>Quiero “descommitear”</h3>
+        <div class="cmd"><pre><code>git reset --soft HEAD~1</code></pre><div class="what">Saca el último commit del historial, pero sus cambios quedan <b>preparados</b>, listos para commitear de nuevo (por ejemplo, partidos en dos commits).</div></div>
+        <div class="callout warn"><span class="ico">!</span><p>¿Ya lo subiste? Entonces no reescribas: usá <a href="#revert"><code>git revert</code></a>.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= RESET ================= -->
+  <section class="block" id="reset" data-search>
+    <div class="section-head">
+      <div class="num">4</div>
+      <div class="titles"><h2>reset y sus tres modos</h2></div>
+    </div>
+    <div class="explain">
+      <p><code>git reset &lt;commit&gt;</code> mueve la rama actual hacia atrás. Los commits que quedan “después” dejan de estar en la rama. La pregunta es <b>qué pasa con los cambios</b> que tenían esos commits: eso lo decide el modo.</p>
+    </div>
+    <div class="diagram">
+      <div class="svg-scroll">
+      <svg viewBox="0 0 1000 250" role="img" aria-label="Reset de C a B: con soft los cambios de C quedan preparados, con mixed quedan sin preparar, con hard se pierden">
+        <text x="20" y="28" class="d-title">git reset HEAD~1  (main estaba en C, pasa a B)</text>
+        <path d="M60,100 L300,100" class="d-line" style="stroke-width:2.4"/>
+        <circle cx="60" cy="100" r="22" class="d-ok"/><text x="60" y="106" text-anchor="middle" class="d-code">A</text>
+        <circle cx="180" cy="100" r="22" class="d-ok"/><text x="180" y="106" text-anchor="middle" class="d-code">B</text>
+        <circle cx="300" cy="100" r="22" class="d-bad" style="stroke-dasharray:5 4"/><text x="300" y="106" text-anchor="middle" class="d-code">C</text>
+        <text x="180" y="156" text-anchor="middle" class="d-code" style="font-weight:700">main</text>
+        <path d="M180,142 L180,126" class="d-line" marker-end="url(#ah)"/>
+        <text x="300" y="156" text-anchor="middle" class="d-lbl">sale de la rama</text>
+
+        <rect x="400" y="50" width="180" height="120" rx="10" class="d-vol"/>
+        <text x="490" y="80" text-anchor="middle" class="d-code" style="font-weight:700">--soft</text>
+        <text x="490" y="106" text-anchor="middle" class="d-sub">los cambios de C</text>
+        <text x="490" y="124" text-anchor="middle" class="d-sub">quedan <tspan class="f-text" style="font-weight:700">preparados</tspan></text>
+        <text x="490" y="152" text-anchor="middle" class="d-lbl">nada se pierde</text>
+
+        <rect x="600" y="50" width="180" height="120" rx="10" class="d-plain"/>
+        <text x="690" y="80" text-anchor="middle" class="d-code" style="font-weight:700">--mixed</text>
+        <text x="690" y="106" text-anchor="middle" class="d-sub">quedan en tus archivos,</text>
+        <text x="690" y="124" text-anchor="middle" class="d-sub"><tspan class="f-text" style="font-weight:700">sin preparar</tspan></text>
+        <text x="690" y="152" text-anchor="middle" class="d-lbl">(modo por defecto)</text>
+
+        <rect x="800" y="50" width="180" height="120" rx="10" class="d-bad"/>
+        <text x="890" y="80" text-anchor="middle" class="d-code" style="font-weight:700">--hard</text>
+        <text x="890" y="106" text-anchor="middle" class="d-sub">archivos iguales a B:</text>
+        <text x="890" y="124" text-anchor="middle" class="d-sub">los cambios <tspan class="f-bad" style="font-weight:700">se pierden</tspan></text>
+        <text x="890" y="152" text-anchor="middle" class="d-lbl">(también lo no commiteado)</text>
+
+        <text x="500" y="220" text-anchor="middle" class="d-sub">En los tres casos C sigue existiendo un tiempo y se puede recuperar con git reflog.</text>
+      </svg>
+      </div>
+    </div>
+    <div class="grid cols-2" style="margin-top:16px">
+      <div class="card">
+        <div class="cmd"><pre><code>git reset --soft HEAD~1</code></pre><div class="what">Deshacer commits y volver a commitear de otra forma.</div></div>
+        <div class="cmd"><pre><code>git reset HEAD~1</code></pre><div class="what">Modo mixto: deshacer commits y decidir de nuevo qué preparar.</div></div>
+      </div>
+      <div class="card">
+        <div class="cmd"><pre><code>git reset --hard origin/main</code></pre><div class="what">Tirar todo lo local y dejar la rama exactamente como en GitHub (después de <code>git fetch</code>). ⚠ Se pierden los commits locales no subidos y los cambios sin commitear.</div></div>
+        <div class="callout bad"><span class="ico">✕</span><p><code>--hard</code> es el único comando habitual que borra trabajo sin commitear de forma irrecuperable. Corré <code>git status</code> antes.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= REVERT ================= -->
+  <section class="block" id="revert" data-search>
+    <div class="section-head">
+      <div class="num">5</div>
+      <div class="titles"><h2>revert: deshacer algo que ya subiste</h2></div>
+    </div>
+    <div class="explain"><p>Si el commit ya está en GitHub, no lo borres: otras personas (o Netlify) pueden tenerlo. <code>git revert</code> crea un commit nuevo que <b>aplica lo contrario</b>: si el original agregó una línea, el revert la quita. El historial queda completo y se ve qué se deshizo y cuándo.</p></div>
+    <div class="grid cols-2">
+      <div class="card">
+        <div class="cmd"><pre><code>git log --oneline</code></pre><div class="what">Buscá el hash del commit a deshacer.</div></div>
+        <div class="cmd"><pre><code>git revert a1f3c9e</code></pre><div class="what">Crea el commit inverso. Se abre el editor con el mensaje “Revert …”: guardá y cerrá.</div></div>
+        <div class="cmd"><pre><code>git push</code></pre><div class="what">Subilo como cualquier otro commit.</div></div>
+      </div>
+      <div class="card">
+        <ul>
+          <li>Si el revert choca con cambios posteriores, aparece un conflicto: se resuelve igual que en un merge y se sigue con <code>git revert --continue</code>.</li>
+          <li><code>git revert HEAD</code> deshace el último commit.</li>
+          <li>Para revertir un commit de merge hay que indicar qué lado conservar: <code>git revert -m 1 &lt;hash&gt;</code> (el lado 1 es la rama en la que estabas al hacer el merge).</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= REFLOG ================= -->
+  <section class="block" id="reflog" data-search>
+    <div class="section-head">
+      <div class="num">6</div>
+      <div class="titles"><h2>Recuperar algo “perdido” con reflog</h2></div>
+    </div>
+    <div class="explain"><p>Hiciste un <code>reset --hard</code> de más, borraste una rama o un rebase salió mal. Mientras los cambios hayan estado <b>commiteados</b>, casi seguro se pueden recuperar: Git guarda en el <b>reflog</b> cada lugar por donde pasó HEAD durante los últimos meses.</p></div>
+    <div class="grid cols-2">
+      <div class="card">
+        <div class="cmd"><pre><code>git reflog</code></pre><div class="what">Lista los movimientos recientes, del más nuevo al más viejo.</div></div>
+        <pre class="out"><code data-lang="plain">b7e10c2 HEAD@{0}: reset: moving to HEAD~1
+9f2d4aa HEAD@{1}: commit: Agrega la ruta /health
+b7e10c2 HEAD@{2}: commit: Corrige el puerto</code></pre>
+        <div class="explain" style="margin-top:8px"><p>Acá, el commit “Agrega la ruta /health” (<code>9f2d4aa</code>) es el que se perdió con el reset.</p></div>
+      </div>
+      <div class="card">
+        <div class="cmd"><pre><code>git reset --hard 9f2d4aa</code></pre><div class="what">Vuelve la rama a ese commit.</div></div>
+        <div class="cmd"><pre><code>git branch rescate 9f2d4aa</code></pre><div class="what">Alternativa más prudente: crea una rama apuntando a ese commit, sin mover la actual.</div></div>
+        <div class="callout info"><span class="ico">i</span><p>El reflog es solo local: no se sube a GitHub ni existe en otro clon.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= VIEJO ================= -->
+  <section class="block" id="viejo" data-search>
+    <div class="section-head">
+      <div class="num">7</div>
+      <div class="titles"><h2>Trabajar con versiones viejas</h2></div>
+    </div>
+    <div class="grid cols-2">
+      <div class="card">
+        <h3>Recuperar un archivo de un commit</h3>
+        <div class="cmd"><pre><code>git restore --source a1f3c9e app.js</code></pre><div class="what">Deja <code>app.js</code> como estaba en ese commit (el resto del proyecto no cambia). Después lo commiteás si te sirve.</div></div>
+        <div class="cmd"><pre><code>git show a1f3c9e:app.js</code></pre><div class="what">Solo muestra el contenido de ese archivo en ese commit, sin tocar nada.</div></div>
+      </div>
+      <div class="card">
+        <h3>Mirar el proyecto entero en el pasado</h3>
+        <div class="cmd"><pre><code>git switch --detach a1f3c9e</code></pre><div class="what">Pone toda la carpeta como estaba en ese commit, en modo “detached HEAD” (sin rama). Sirve para probar algo viejo.</div></div>
+        <div class="cmd"><pre><code>git switch main</code></pre><div class="what">Volver al presente. Si en el modo detached hiciste commits que querés conservar, antes creá una rama: <code>git switch -c nombre</code>.</div></div>
+      </div>
+    </div>
+  </section>
+
+  <p class="empty">No encontré resultados.</p>
+
+  <footer class="foot">
+    <a href="05-github.html">← GitHub y remotos</a>
+    <a href="07-problemas.html">Siguiente: Problemas comunes →</a>
+  </footer>
+</main>
+</body>
+</html>

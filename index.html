@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Cheatsheets de Git en español, pensadas para empezar de cero: conceptos, primeros pasos con GitHub, uso diario, ramas, deshacer cambios y problemas comunes.">
+<meta name="theme-color" content="#bc4c00">
+<title>Git Cheatsheets</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect x='4' y='4' width='56' height='56' rx='14' fill='%23bc4c00'/%3E%3Cg fill='none' stroke='%23fff' stroke-width='3.4' stroke-linecap='round'%3E%3Cpath d='M22 18v28'/%3E%3Cpath d='M22 30c0-6 20-4 20-12'/%3E%3C/g%3E%3Cg fill='%23fff'%3E%3Ccircle cx='22' cy='18' r='4.5'/%3E%3Ccircle cx='22' cy='46' r='4.5'/%3E%3Ccircle cx='42' cy='18' r='4.5'/%3E%3C/g%3E%3C/svg%3E">
+<link rel="stylesheet" href="assets/style.css">
+<script src="assets/app.js"></script>
+</head>
+<body data-page="inicio">
+<header class="topbar"></header>
+
+<main class="wrap">
+
+  <div class="hero">
+    <span class="eyebrow">Referencia y guía</span>
+    <h1>Git Cheatsheets</h1>
+    <p class="lead">Git guarda el historial de cambios de tu proyecto: podés ver qué cambió, volver atrás, probar cosas en paralelo y compartir el código en GitHub. Estas hojas están escritas para alguien que lo usa por primera vez: cada término se explica y la guía de <a href="02-primeros-pasos.html">Primeros pasos</a> te lleva de cero a tu proyecto publicado.</p>
+    <div class="toolbar">
+      <label class="search">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        <input id="q" type="search" placeholder="Quiero… subir cambios, crear una rama, deshacer el último commit…" autocomplete="off" aria-label="Buscar qué querés hacer">
+        <span class="hint"><kbd>/</kbd></span>
+      </label>
+    </div>
+  </div>
+
+  <!-- ================= RUTA ================= -->
+  <section class="block">
+    <div class="section-head">
+      <div class="titles"><h2>Por dónde empezar</h2><p>Si nunca usaste Git, seguí este orden. Si ya lo usás, buscá directo lo que necesitás.</p></div>
+    </div>
+    <div class="card">
+      <ol class="steps">
+        <li><a href="01-conceptos.html"><b>Conceptos</b></a>: qué es un repositorio, un commit y las zonas por las que pasa un cambio (15 minutos de lectura).</li>
+        <li><a href="02-primeros-pasos.html"><b>Primeros pasos</b></a>: instalar, configurar, primer commit y subir el proyecto a GitHub. Hacelo con la terminal abierta.</li>
+        <li><a href="03-uso-diario.html"><b>Uso diario</b></a>: los comandos de todos los días, para tener a mano.</li>
+        <li><a href="04-ramas.html"><b>Ramas</b></a> y <a href="05-github.html"><b>GitHub y remotos</b></a>: trabajar en paralelo, pull requests y publicar en Netlify.</li>
+        <li><a href="06-deshacer.html"><b>Deshacer cambios</b></a> y <a href="07-problemas.html"><b>Problemas comunes</b></a>: para cuando algo sale distinto de lo esperado.</li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- ================= HOJAS ================= -->
+  <section class="block">
+    <div class="section-head">
+      <div class="titles"><h2>Las hojas</h2></div>
+    </div>
+    <div class="grid cols-3">
+      <a class="card sheet-card" href="01-conceptos.html">
+        <h3>01 · Conceptos</h3>
+        <p>Repositorio, commit, área de preparación, ramas, remotos y la diferencia entre Git y GitHub, con diagramas.</p>
+        <div class="chips"><span>commit</span><span>staging</span><span>HEAD</span><span>origin</span></div>
+      </a>
+      <a class="card sheet-card" href="02-primeros-pasos.html">
+        <h3>02 · Primeros pasos</h3>
+        <p>Guía completa en Windows: instalar, configurar, primer commit, .gitignore, subir a GitHub y clonar.</p>
+        <div class="chips"><span>git init</span><span>git push -u</span><span>git clone</span></div>
+      </a>
+      <a class="card sheet-card" href="03-uso-diario.html">
+        <h3>03 · Uso diario</h3>
+        <p>status, add, commit, log, diff, mover y borrar archivos, stash y tags, explicados.</p>
+        <div class="chips"><span>git status</span><span>git log</span><span>git diff</span></div>
+      </a>
+      <a class="card sheet-card" href="04-ramas.html">
+        <h3>04 · Ramas</h3>
+        <p>Crear y cambiar de rama, merge, resolver conflictos paso a paso, rebase y un flujo de trabajo.</p>
+        <div class="chips"><span>git switch -c</span><span>git merge</span><span>conflictos</span></div>
+      </a>
+      <a class="card sheet-card" href="05-github.html">
+        <h3>05 · GitHub y remotos</h3>
+        <p>fetch, pull y push, pull requests, forks, iniciar sesión (HTTPS, token, SSH) y publicar en Netlify.</p>
+        <div class="chips"><span>git pull</span><span>pull request</span><span>Netlify</span></div>
+      </a>
+      <a class="card sheet-card" href="06-deshacer.html">
+        <h3>06 · Deshacer cambios</h3>
+        <p>Qué comando usar según el caso: restore, amend, reset, revert y recuperar commits con reflog.</p>
+        <div class="chips"><span>git restore</span><span>git revert</span><span>git reflog</span></div>
+      </a>
+      <a class="card sheet-card" href="07-problemas.html">
+        <h3>07 · Problemas comunes</h3>
+        <p>Los errores típicos, con qué significan y cómo arreglarlos. Pegá el mensaje en el buscador.</p>
+        <div class="chips"><span>rejected</span><span>Authentication failed</span><span>CRLF</span></div>
+      </a>
+    </div>
+  </section>
+
+  <!-- ================= QUIERO ================= -->
+  <section class="block" id="quiero" data-search>
+    <div class="section-head">
+      <div class="titles"><h2>Quiero…</h2><p>Lo que querés hacer y el comando. Cada uno está explicado en su hoja.</p></div>
+    </div>
+    <div class="grid cols-2">
+      <div class="card">
+        <h3>Guardar y compartir</h3>
+        <div class="want">
+          <div class="want-row"><div class="q">Ver qué cambió<small>estado, status, modificado</small></div><pre><code>git status</code></pre></div>
+          <div class="want-row"><div class="q">Guardar mis cambios<small>commit, guardar, add</small></div><pre><code>git add .
+git commit -m "&lt;mensaje&gt;"</code></pre></div>
+          <div class="want-row"><div class="q">Subirlos a GitHub<small>push, subir</small></div><pre><code>git push</code></pre></div>
+          <div class="want-row"><div class="q">Traer lo nuevo de GitHub<small>pull, actualizar, bajar</small></div><pre><code>git pull</code></pre></div>
+          <div class="want-row"><div class="q">Copiar un repo de GitHub a mi PC<small>clone, descargar</small></div><pre><code>git clone &lt;url&gt;</code></pre></div>
+          <div class="want-row"><div class="q">Ver el historial<small>log, commits, historia</small></div><pre><code>git log --oneline</code></pre></div>
+        </div>
+      </div>
+      <div class="card">
+        <h3>Ramas</h3>
+        <div class="want">
+          <div class="want-row"><div class="q">Crear una rama y pasarme a ella<small>branch, switch, nueva</small></div><pre><code>git switch -c &lt;nombre&gt;</code></pre></div>
+          <div class="want-row"><div class="q">Cambiar de rama<small>switch, checkout</small></div><pre><code>git switch &lt;nombre&gt;</code></pre></div>
+          <div class="want-row"><div class="q">Unir una rama a main<small>merge, juntar</small></div><pre><code>git switch main
+git merge &lt;nombre&gt;</code></pre></div>
+          <div class="want-row"><div class="q">Subir una rama nueva<small>push -u, publicar rama</small></div><pre><code>git push -u origin &lt;nombre&gt;</code></pre></div>
+          <div class="want-row"><div class="q">Borrar una rama ya unida<small>branch -d, eliminar</small></div><pre><code>git branch -d &lt;nombre&gt;</code></pre></div>
+        </div>
+      </div>
+      <div class="card">
+        <h3>Deshacer</h3>
+        <div class="want">
+          <div class="want-row"><div class="q">Descartar los cambios de un archivo<small>restore, descartar, volver</small></div><pre><code>git restore &lt;archivo&gt;</code></pre></div>
+          <div class="want-row"><div class="q">Deshacer un git add<small>despreparar, unstage</small></div><pre><code>git restore --staged &lt;archivo&gt;</code></pre></div>
+          <div class="want-row"><div class="q">Corregir el último commit<small>amend, mensaje, olvidé</small></div><pre><code>git commit --amend</code></pre></div>
+          <div class="want-row"><div class="q">Deshacer un commit ya subido<small>revert, revertir</small></div><pre><code>git revert &lt;hash&gt;</code></pre></div>
+          <div class="want-row"><div class="q">Guardar cambios a un costado<small>stash, guardar temporal</small></div><pre><code>git stash
+git stash pop</code></pre></div>
+        </div>
+      </div>
+      <div class="card">
+        <h3>Empezar</h3>
+        <div class="want">
+          <div class="want-row"><div class="q">Instalar Git<small>winget, instalar</small></div><pre><code>winget install --id Git.Git -e --source winget</code></pre></div>
+          <div class="want-row"><div class="q">Configurar mi nombre y email<small>config, identidad</small></div><pre><code>git config --global user.name "&lt;nombre&gt;"
+git config --global user.email "&lt;email&gt;"</code></pre></div>
+          <div class="want-row"><div class="q">Crear un repositorio<small>init, nuevo proyecto</small></div><pre><code>git init</code></pre></div>
+          <div class="want-row"><div class="q">Conectar con GitHub<small>remote add, origin</small></div><pre><code>git remote add origin &lt;url&gt;
+git push -u origin main</code></pre></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= COMO LEER ================= -->
+  <section class="block">
+    <div class="section-head">
+      <div class="titles"><h2>Cómo leer los comandos de estas hojas</h2></div>
+    </div>
+    <div class="card">
+      <ul>
+        <li>Los bloques oscuros son comandos para la terminal. Se ejecutan con <kbd>Enter</kbd>; si hay varias líneas, de a una. El botón de la derecha los copia.</li>
+        <li><code>&lt;nombre&gt;</code>: reemplazalo por tu valor, sin los signos <code>&lt; &gt;</code>.</li>
+        <li><code># texto</code>: comentario, no se escribe.</li>
+        <li>Las palabras con guiones después del comando (<code>-m</code>, <code>--oneline</code>) son <b>opciones</b> que cambian lo que hace.</li>
+        <li>Los bloques grises con la etiqueta <b>salida</b> muestran lo que responde Git, para que compares.</li>
+        <li>Botón ☀/☾ arriba a la derecha: tema claro u oscuro. <kbd>Ctrl</kbd>+<kbd>P</kbd> → “Guardar como PDF” para imprimir.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ================= DESCARGAS ================= -->
+  <section class="block" id="descargas">
+    <div class="section-head">
+      <div class="titles"><h2>Descargar como imagen</h2><p>Cada hoja completa en PNG.</p></div>
+    </div>
+    <div class="card">
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Hoja</th><th>Tema oscuro</th><th>Tema claro</th></tr></thead>
+          <tbody>
+            <tr><td>Inicio</td><td><a href="img/index-dark.png" download>index-dark.png</a></td><td><a href="img/index-light.png" download>index-light.png</a></td></tr>
+            <tr><td>01 · Conceptos</td><td><a href="img/01-conceptos-dark.png" download>01-conceptos-dark.png</a></td><td><a href="img/01-conceptos-light.png" download>01-conceptos-light.png</a></td></tr>
+            <tr><td>02 · Primeros pasos</td><td><a href="img/02-primeros-pasos-dark.png" download>02-primeros-pasos-dark.png</a></td><td><a href="img/02-primeros-pasos-light.png" download>02-primeros-pasos-light.png</a></td></tr>
+            <tr><td>03 · Uso diario</td><td><a href="img/03-uso-diario-dark.png" download>03-uso-diario-dark.png</a></td><td><a href="img/03-uso-diario-light.png" download>03-uso-diario-light.png</a></td></tr>
+            <tr><td>04 · Ramas</td><td><a href="img/04-ramas-dark.png" download>04-ramas-dark.png</a></td><td><a href="img/04-ramas-light.png" download>04-ramas-light.png</a></td></tr>
+            <tr><td>05 · GitHub y remotos</td><td><a href="img/05-github-dark.png" download>05-github-dark.png</a></td><td><a href="img/05-github-light.png" download>05-github-light.png</a></td></tr>
+            <tr><td>06 · Deshacer cambios</td><td><a href="img/06-deshacer-dark.png" download>06-deshacer-dark.png</a></td><td><a href="img/06-deshacer-light.png" download>06-deshacer-light.png</a></td></tr>
+            <tr><td>07 · Problemas comunes</td><td><a href="img/07-problemas-dark.png" download>07-problemas-dark.png</a></td><td><a href="img/07-problemas-light.png" download>07-problemas-light.png</a></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <p class="empty">Nada por acá. Probá en <a href="03-uso-diario.html">Uso diario</a> o en <a href="07-problemas.html">Problemas comunes</a>.</p>
+
+  <footer class="foot">
+    <span>Git Cheatsheets</span>
+    <a href="01-conceptos.html">Empezar por Conceptos →</a>
+  </footer>
+</main>
+</body>
+</html>

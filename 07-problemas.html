@@ -1,0 +1,299 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Errores comunes de Git explicados con causa y solución: push rechazado, autenticación, conflictos, detached HEAD, CRLF, secretos subidos y más.">
+<meta name="theme-color" content="#bc4c00">
+<title>Git · Problemas comunes</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect x='4' y='4' width='56' height='56' rx='14' fill='%23bc4c00'/%3E%3Cg fill='none' stroke='%23fff' stroke-width='3.4' stroke-linecap='round'%3E%3Cpath d='M22 18v28'/%3E%3Cpath d='M22 30c0-6 20-4 20-12'/%3E%3C/g%3E%3Cg fill='%23fff'%3E%3Ccircle cx='22' cy='18' r='4.5'/%3E%3Ccircle cx='22' cy='46' r='4.5'/%3E%3Ccircle cx='42' cy='18' r='4.5'/%3E%3C/g%3E%3C/svg%3E">
+<link rel="stylesheet" href="assets/style.css">
+<script src="assets/app.js"></script>
+<style>
+  .fix dt { font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); margin-top: 10px; }
+  .fix dd { margin: 3px 0 0; font-size: 15px; }
+  .fix dd pre { margin-top: 6px; }
+  .err pre { background: var(--surface-2); color: var(--bad); border-color: var(--border); }
+  .err pre .copy { display: none; }
+  .err pre code span { color: inherit !important; font-weight: inherit !important; font-style: normal !important; }
+</style>
+</head>
+<body data-page="problemas">
+<header class="topbar"></header>
+
+<main class="wrap">
+
+  <div class="hero">
+    <span class="eyebrow">Git · 07</span>
+    <h1>Problemas comunes</h1>
+    <p class="lead">Pegá en el buscador una parte del mensaje de error. Cada caso explica <b>qué significa</b>, <b>por qué pasa</b> y <b>cómo se arregla</b>. Los mensajes de Git están en inglés: acá van tal cual aparecen.</p>
+    <div class="toolbar">
+      <label class="search">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        <input id="q" type="search" placeholder="rejected, Authentication failed, CRLF, detached HEAD, not a git repository…" autocomplete="off" aria-label="Buscar problema">
+        <span class="hint"><kbd>/</kbd></span>
+      </label>
+    </div>
+    <nav class="toc">
+      <a href="#inicio">Al empezar</a>
+      <a href="#subir">Al subir (push)</a>
+      <a href="#acceso">Inicio de sesión</a>
+      <a href="#ramas">Ramas y merges</a>
+      <a href="#archivos">Archivos</a>
+    </nav>
+  </div>
+
+  <section class="terms-box">
+    <h2>Antes de buscar</h2>
+    <p>Tres comandos que aclaran casi cualquier situación, y no modifican nada:</p>
+    <dl class="terms">
+      <dt><code>git status</code></dt><dd>En qué rama estás, qué cambió y, muchas veces, qué comando sugiere Git para seguir (leé las líneas entre paréntesis).</dd>
+      <dt><code>git log --oneline -5</code></dt><dd>Los últimos commits, para saber dónde estás parado.</dd>
+      <dt><code>git remote -v</code></dt><dd>A qué repositorio de GitHub está conectada la carpeta.</dd>
+    </dl>
+  </section>
+
+  <!-- ================= INICIO ================= -->
+  <section class="block" id="inicio" data-search>
+    <div class="section-head">
+      <div class="num">1</div>
+      <div class="titles"><h2>Al empezar</h2></div>
+    </div>
+    <div class="grid">
+      <div class="card">
+        <h3>No es un repositorio</h3>
+        <div class="err"><pre><code data-lang="plain">fatal: not a git repository (or any of the parent directories): .git</code></pre></div>
+        <dl class="fix">
+          <dt>Qué pasa</dt><dd>La terminal está en una carpeta que no tiene repositorio Git (ni ella ni las de arriba tienen <code>.git</code>).</dd>
+          <dt>Solución</dt><dd>Entrá a la carpeta correcta con <code>cd</code>, o si es un proyecto nuevo, creá el repo con <code>git init</code>.</dd>
+        </dl>
+      </div>
+      <div class="card">
+        <h3>Git no sabe quién sos</h3>
+        <div class="err"><pre><code data-lang="plain">Author identity unknown
+*** Please tell me who you are.</code></pre></div>
+        <dl class="fix">
+          <dt>Qué pasa</dt><dd>Falta configurar nombre y email, que van en cada commit.</dd>
+          <dt>Solución</dt><dd><pre><code>git config --global user.name "&lt;Tu Nombre&gt;"
+git config --global user.email "&lt;tu-email&gt;"</code></pre></dd>
+        </dl>
+      </div>
+      <div class="card">
+        <h3>Nada para commitear</h3>
+        <div class="err"><pre><code data-lang="plain">no changes added to commit (use "git add" and/or "git commit -a")</code></pre></div>
+        <dl class="fix">
+          <dt>Qué pasa</dt><dd>Modificaste archivos pero no los preparaste. El commit solo incluye lo que pasó por <code>git add</code>.</dd>
+          <dt>Solución</dt><dd><code>git add .</code> (o el archivo puntual) y después <code>git commit -m "…"</code>. Si dice <i>“nothing to commit, working tree clean”</i>, no hay ningún cambio desde el último commit.</dd>
+        </dl>
+      </div>
+      <div class="card">
+        <h3>Se abrió una pantalla rara y no puedo salir</h3>
+        <dl class="fix">
+          <dt>Qué pasa</dt><dd>Git abrió su editor por defecto (Vim) para que escribas un mensaje, por ejemplo al hacer un merge o un commit sin <code>-m</code>.</dd>
+          <dt>Solución</dt><dd>Para guardar y salir: <kbd>Esc</kbd>, después escribí <code>:wq</code> y <kbd>Enter</kbd>. Para no volver a verlo, configurá VS Code como editor: <code>git config --global core.editor "code --wait"</code>.</dd>
+        </dl>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= SUBIR ================= -->
+  <section class="block" id="subir" data-search>
+    <div class="section-head">
+      <div class="num">2</div>
+      <div class="titles"><h2>Al subir (push)</h2></div>
+    </div>
+    <div class="grid">
+      <div class="card">
+        <h3>Push rechazado: el remoto tiene cambios que no tenés</h3>
+        <div class="err"><pre><code data-lang="plain">! [rejected]        main -&gt; main (fetch first)
+error: failed to push some refs to 'https://github.com/...'
+hint: Updates were rejected because the remote contains work that you do not have locally.</code></pre></div>
+        <dl class="fix">
+          <dt>Qué pasa</dt><dd>Alguien (o vos desde otra PC, o editando en la web de GitHub) subió commits que tu copia no tiene. Git no te deja pisarlos.</dd>
+          <dt>Solución</dt><dd><pre><code>git pull
+git push</code></pre>Si <code>pull</code> marca conflictos, resolvelos (ver <a href="04-ramas.html#conflictos">Ramas</a>). No uses <code>--force</code> para “arreglarlo”.</dd>
+        </dl>
+      </div>
+      <div class="card">
+        <h3>Historias no relacionadas</h3>
+        <div class="err"><pre><code data-lang="plain">fatal: refusing to merge unrelated histories</code></pre></div>
+        <dl class="fix">
+          <dt>Qué pasa</dt><dd>Creaste el repo en GitHub <b>con</b> un README (u otro archivo) y también tenías commits locales: son dos historiales que no comparten ningún commit.</dd>
+          <dt>Solución</dt><dd><pre><code>git pull origin main --allow-unrelated-histories
+git push -u origin main</code></pre>Para la próxima: creá el repo de GitHub vacío.</dd>
+        </dl>
+      </div>
+      <div class="card">
+        <h3>No hay nada que subir con ese nombre</h3>
+        <div class="err"><pre><code data-lang="plain">error: src refspec main does not match any</code></pre></div>
+        <dl class="fix">
+          <dt>Qué pasa</dt><dd>No existe una rama local <code>main</code>: todavía no hiciste ningún commit, o la rama se llama <code>master</code>.</dd>
+          <dt>Solución</dt><dd>Hacé al menos un commit y renombrá la rama: <code>git branch -M main</code>. Después <code>git push -u origin main</code>.</dd>
+        </dl>
+      </div>
+      <div class="card">
+        <h3>El remoto ya existe</h3>
+        <div class="err"><pre><code data-lang="plain">error: remote origin already exists.</code></pre></div>
+        <dl class="fix">
+          <dt>Solución</dt><dd>Ya está conectado. Para cambiar la dirección: <code>git remote set-url origin &lt;url-nueva&gt;</code>. Verificá con <code>git remote -v</code>.</dd>
+        </dl>
+      </div>
+      <div class="card">
+        <h3>GitHub bloquea el push por un secreto</h3>
+        <div class="err"><pre><code data-lang="plain">remote: error: GH013: Repository rule violations found for refs/heads/main.
+remote: - Push cannot contain secrets</code></pre></div>
+        <dl class="fix">
+          <dt>Qué pasa</dt><dd>La protección de GitHub detectó una clave o token en tus commits y frenó el push (por suerte).</dd>
+          <dt>Solución</dt><dd>Sacá el secreto del archivo, movelo a <code>.env</code> (en el <code>.gitignore</code>) y corregí el commit local: si es el último, <code>git commit --amend</code>; si es más viejo, <code>git reset --soft &lt;hash-anterior&gt;</code> y volvé a commitear. Considerá ese secreto expuesto y regeneralo.</dd>
+        </dl>
+      </div>
+      <div class="card">
+        <h3>Archivo demasiado grande</h3>
+        <div class="err"><pre><code data-lang="plain">remote: error: File video.mp4 is 150.00 MB; this exceeds GitHub's file size limit of 100.00 MB</code></pre></div>
+        <dl class="fix">
+          <dt>Qué pasa</dt><dd>GitHub no acepta archivos de más de 100 MB, aunque ya los hayas borrado en un commit posterior (siguen en el historial).</dd>
+          <dt>Solución</dt><dd>Sacalo de los commits que todavía no subiste (<code>git reset --soft origin/main</code>, después <code>git rm --cached video.mp4</code>, agregalo al <code>.gitignore</code> y volvé a commitear). Para versionar archivos grandes existe <b>Git LFS</b>.</dd>
+        </dl>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= ACCESO ================= -->
+  <section class="block" id="acceso" data-search>
+    <div class="section-head">
+      <div class="num">3</div>
+      <div class="titles"><h2>Inicio de sesión</h2></div>
+    </div>
+    <div class="grid">
+      <div class="card">
+        <h3>La contraseña no funciona</h3>
+        <div class="err"><pre><code data-lang="plain">remote: Support for password authentication was removed on August 13, 2021.
+fatal: Authentication failed for 'https://github.com/...'</code></pre></div>
+        <dl class="fix">
+          <dt>Qué pasa</dt><dd>GitHub no acepta la contraseña de tu cuenta desde la terminal.</dd>
+          <dt>Solución</dt><dd>Iniciá sesión con el navegador (Git Credential Manager) o usá un token personal en lugar de la contraseña. Pasos en <a href="05-github.html#acceso">GitHub y remotos</a>.</dd>
+        </dl>
+      </div>
+      <div class="card">
+        <h3>No puede pedirte usuario</h3>
+        <div class="err"><pre><code data-lang="plain">fatal: could not read Username for 'https://github.com': terminal prompts disabled</code></pre></div>
+        <dl class="fix">
+          <dt>Qué pasa</dt><dd>Git necesita que inicies sesión, pero lo ejecutó un programa que no puede mostrarte la ventana de login (un script, una herramienta automática, algunos editores).</dd>
+          <dt>Solución</dt><dd>Hacé el <code>git push</code> una vez desde una terminal normal (PowerShell o la de VS Code): ahí aparece el login del navegador y la sesión queda guardada para las demás herramientas.</dd>
+        </dl>
+      </div>
+      <div class="card">
+        <h3>SSH sin permiso</h3>
+        <div class="err"><pre><code data-lang="plain">git@github.com: Permission denied (publickey).</code></pre></div>
+        <dl class="fix">
+          <dt>Qué pasa</dt><dd>El remoto usa SSH y GitHub no reconoce ninguna clave de tu PC.</dd>
+          <dt>Solución</dt><dd>Creá una clave y agregala a GitHub (ver <a href="05-github.html#acceso">SSH</a>), o pasá a HTTPS: <code>git remote set-url origin https://github.com/&lt;usuario&gt;/&lt;repo&gt;.git</code>.</dd>
+        </dl>
+      </div>
+      <div class="card">
+        <h3>Sesión de otra cuenta guardada</h3>
+        <div class="err"><pre><code data-lang="plain">remote: Permission to &lt;usuario&gt;/&lt;repo&gt;.git denied to &lt;otra-cuenta&gt;.</code></pre></div>
+        <dl class="fix">
+          <dt>Qué pasa</dt><dd>Windows tiene guardada la sesión de otra cuenta de GitHub.</dd>
+          <dt>Solución</dt><dd>Abrí <b>Administrador de credenciales</b> de Windows → <b>Credenciales de Windows</b> → borrá la entrada <code>git:https://github.com</code>. En el próximo push, iniciá sesión con la cuenta correcta.</dd>
+        </dl>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= RAMAS ================= -->
+  <section class="block" id="ramas" data-search>
+    <div class="section-head">
+      <div class="num">4</div>
+      <div class="titles"><h2>Ramas y merges</h2></div>
+    </div>
+    <div class="grid">
+      <div class="card">
+        <h3>Conflicto al unir</h3>
+        <div class="err"><pre><code data-lang="plain">CONFLICT (content): Merge conflict in app.js
+Automatic merge failed; fix conflicts and then commit the result.</code></pre></div>
+        <dl class="fix">
+          <dt>Qué pasa</dt><dd>Las dos ramas cambiaron las mismas líneas. No es un error: Git te pide que elijas.</dd>
+          <dt>Solución</dt><dd>Editá el archivo, dejá la versión correcta y borrá las marcas <code>&lt;&lt;&lt;&lt;&lt;&lt;&lt;</code> <code>=======</code> <code>&gt;&gt;&gt;&gt;&gt;&gt;&gt;</code>; después <code>git add app.js</code> y <code>git commit</code>. Para cancelar: <code>git merge --abort</code>. Paso a paso en <a href="04-ramas.html#conflictos">Ramas</a>.</dd>
+        </dl>
+      </div>
+      <div class="card">
+        <h3>Detached HEAD</h3>
+        <div class="err"><pre><code data-lang="plain">You are in 'detached HEAD' state.</code></pre></div>
+        <dl class="fix">
+          <dt>Qué pasa</dt><dd>Estás mirando un commit puntual (o un tag), no una rama. Podés ver y probar, pero los commits que hagas no quedan en ninguna rama.</dd>
+          <dt>Solución</dt><dd>Para volver: <code>git switch main</code>. Si hiciste commits ahí y los querés conservar: <code>git switch -c rama-nueva</code> antes de irte.</dd>
+        </dl>
+      </div>
+      <div class="card">
+        <h3>Cambios locales en el camino</h3>
+        <div class="err"><pre><code data-lang="plain">error: Your local changes to the following files would be overwritten by checkout:
+        app.js
+Please commit your changes or stash them before you switch branches.</code></pre></div>
+        <dl class="fix">
+          <dt>Qué pasa</dt><dd>Tenés cambios sin commitear en archivos que la otra rama (o el <code>pull</code>) necesita modificar.</dd>
+          <dt>Solución</dt><dd>Commitealos, o guardalos un rato: <code>git stash</code> → cambiás de rama o hacés pull → <code>git stash pop</code>.</dd>
+        </dl>
+      </div>
+      <div class="card">
+        <h3>No encuentra la rama</h3>
+        <div class="err"><pre><code data-lang="plain">fatal: invalid reference: feature-x
+error: pathspec 'feature-x' did not match any file(s) known to git</code></pre></div>
+        <dl class="fix">
+          <dt>Qué pasa</dt><dd>El nombre está mal escrito o la rama existe solo en GitHub y tu PC todavía no se enteró.</dd>
+          <dt>Solución</dt><dd><code>git fetch</code> y después <code>git switch feature-x</code> (Git crea la rama local a partir de <code>origin/feature-x</code>). <code>git branch -a</code> lista todas.</dd>
+        </dl>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= ARCHIVOS ================= -->
+  <section class="block" id="archivos" data-search>
+    <div class="section-head">
+      <div class="num">5</div>
+      <div class="titles"><h2>Archivos</h2></div>
+    </div>
+    <div class="grid">
+      <div class="card">
+        <h3>Aviso de LF y CRLF</h3>
+        <div class="err"><pre><code data-lang="plain">warning: in the working copy of 'app.js', LF will be replaced by CRLF the next time Git touches it</code></pre></div>
+        <dl class="fix">
+          <dt>Qué pasa</dt><dd>Es un <b>aviso</b>, no un error. Windows y Linux marcan el fin de línea distinto; con <code>core.autocrlf=true</code> Git convierte solo y te avisa.</dd>
+          <dt>Solución</dt><dd>No hace falta hacer nada. Si querés reglas fijas por proyecto, agregá un <code>.gitattributes</code> con <code>* text=auto</code>.</dd>
+        </dl>
+      </div>
+      <div class="card">
+        <h3>El .gitignore no ignora un archivo</h3>
+        <dl class="fix">
+          <dt>Qué pasa</dt><dd>El <code>.gitignore</code> solo afecta archivos que Git <b>todavía no sigue</b>. Si el archivo ya estaba en un commit, se sigue rastreando.</dd>
+          <dt>Solución</dt><dd><pre><code>git rm --cached .env
+git commit -m "Deja de versionar .env"</code></pre>El archivo queda en tu disco, pero sale del repo (en los commits viejos sigue estando).</dd>
+        </dl>
+      </div>
+      <div class="card">
+        <h3>Subí una contraseña o un secreto</h3>
+        <dl class="fix">
+          <dt>Qué pasa</dt><dd>Borrarlo en un commit nuevo no alcanza: sigue en el historial y cualquiera con acceso al repo lo puede ver.</dd>
+          <dt>Solución</dt><dd>1) <b>Cambiá</b> la contraseña o regenerá la clave: es lo único que te protege de verdad. 2) Sacala del repo (<code>git rm --cached</code>) y agregá el archivo al <code>.gitignore</code>. 3) Si hace falta borrarla del historial, existen herramientas como <code>git filter-repo</code>, y después hay que forzar el push.</dd>
+        </dl>
+      </div>
+      <div class="card">
+        <h3>El README se ve con caracteres raros en GitHub</h3>
+        <div class="err"><pre><code data-lang="plain">#   d o c k e r - c h e a t s h e e t</code></pre></div>
+        <dl class="fix">
+          <dt>Qué pasa</dt><dd>Usaste <code>echo "..." &gt;&gt; README.md</code> en <b>Windows PowerShell 5.1</b>: guarda el texto en UTF-16, y GitHub espera UTF-8. Por eso aparecen espacios o caracteres raros entre las letras.</dd>
+          <dt>Solución</dt><dd>Abrí el archivo en VS Code, corregí la línea, y en la barra inferior hacé clic en la codificación → <b>Save with Encoding</b> → <b>UTF-8</b>. Para escribir archivos desde PowerShell: <code>Set-Content -Encoding utf8</code> en lugar de <code>&gt;</code> o <code>&gt;&gt;</code>.</dd>
+        </dl>
+      </div>
+    </div>
+  </section>
+
+  <p class="empty">No encontré ese problema. Probá con otra parte del mensaje de error.</p>
+
+  <footer class="foot">
+    <a href="06-deshacer.html">← Deshacer cambios</a>
+    <a href="index.html">Volver al inicio</a>
+  </footer>
+</main>
+</body>
+</html>

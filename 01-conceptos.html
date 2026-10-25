@@ -1,0 +1,286 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Qué es Git explicado desde cero: repositorio, commit, área de preparación, ramas, remotos y la diferencia entre Git y GitHub.">
+<meta name="theme-color" content="#bc4c00">
+<title>Git · Conceptos</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect x='4' y='4' width='56' height='56' rx='14' fill='%23bc4c00'/%3E%3Cg fill='none' stroke='%23fff' stroke-width='3.4' stroke-linecap='round'%3E%3Cpath d='M22 18v28'/%3E%3Cpath d='M22 30c0-6 20-4 20-12'/%3E%3C/g%3E%3Cg fill='%23fff'%3E%3Ccircle cx='22' cy='18' r='4.5'/%3E%3Ccircle cx='22' cy='46' r='4.5'/%3E%3Ccircle cx='42' cy='18' r='4.5'/%3E%3C/g%3E%3C/svg%3E">
+<link rel="stylesheet" href="assets/style.css">
+<script src="assets/app.js"></script>
+</head>
+<body data-page="conceptos">
+<header class="topbar"></header>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <defs>
+    <marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="d-head"/></marker>
+    <marker id="ah-ok" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="f-ok"/></marker>
+    <marker id="ah-img" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="f-img"/></marker>
+  </defs>
+</svg>
+
+<main class="wrap">
+
+  <div class="hero">
+    <span class="eyebrow">Git · 01</span>
+    <h1>Conceptos de Git, desde cero</h1>
+    <p class="lead">Git es un programa que guarda el <b>historial de cambios</b> de una carpeta. Cada vez que le pedís, saca una “foto” de tus archivos y la guarda con un mensaje. Después podés ver qué cambió, volver atrás, trabajar en paralelo y compartir el proyecto con otras personas.</p>
+    <nav class="toc">
+      <a href="#problema">Qué problema resuelve</a>
+      <a href="#zonas">Las cuatro zonas</a>
+      <a href="#commits">Commits e historial</a>
+      <a href="#archivo">Estados de un archivo</a>
+      <a href="#ramas">Ramas</a>
+      <a href="#github">Git y GitHub</a>
+    </nav>
+  </div>
+
+  <section class="terms-box">
+    <h2>Términos de esta página</h2>
+    <p>Volvé acá cuando una palabra no te suene. Todas se explican con más detalle abajo.</p>
+    <dl class="terms">
+      <dt>Repositorio (repo)</dt><dd>Una carpeta cuyo historial controla Git. Se distingue porque adentro tiene una carpeta oculta llamada <code>.git</code>, donde Git guarda todo el historial.</dd>
+      <dt>Commit</dt><dd>Una “foto” guardada del proyecto en un momento dado, con un mensaje que explica qué cambió, la fecha y quién lo hizo. Es la unidad básica del historial.</dd>
+      <dt>Hash</dt><dd>El identificador único de cada commit: un código como <code>3ddb522</code> (versión corta de uno de 40 caracteres). Sirve para referirse a un commit puntual.</dd>
+      <dt>Carpeta de trabajo</dt><dd>Los archivos tal como los ves y editás en tu editor (en inglés, <i>working directory</i>).</dd>
+      <dt>Área de preparación</dt><dd>Una “sala de espera” donde ponés los cambios que querés incluir en el próximo commit (en inglés, <i>staging area</i> o <i>index</i>). Se llena con <code>git add</code>.</dd>
+      <dt>Rama (branch)</dt><dd>Una línea de trabajo independiente. Permite probar algo sin tocar la versión principal. La rama principal suele llamarse <code>main</code>.</dd>
+      <dt>HEAD</dt><dd>Un marcador que indica “dónde estás parado”: normalmente apunta a la rama actual y, a través de ella, al último commit.</dd>
+      <dt>Remoto (remote)</dt><dd>Una copia del repositorio en otro lugar, normalmente en GitHub. Por convención, el remoto principal se llama <code>origin</code>.</dd>
+      <dt>Clonar</dt><dd>Descargar un repositorio remoto completo (archivos + historial) a tu computadora.</dd>
+      <dt>Push / Pull</dt><dd><b>Push</b>: subir tus commits al remoto. <b>Pull</b>: traer los commits nuevos del remoto a tu copia.</dd>
+      <dt>Merge</dt><dd>Unir los cambios de una rama con otra.</dd>
+      <dt>GitHub</dt><dd>Un sitio web que guarda repositorios Git en internet y agrega herramientas para colaborar. Git es el programa; GitHub es un servicio que lo usa.</dd>
+    </dl>
+  </section>
+
+  <!-- ================= PROBLEMA ================= -->
+  <section class="block" id="problema">
+    <div class="section-head">
+      <div class="num">1</div>
+      <div class="titles"><h2>Qué problema resuelve Git</h2></div>
+    </div>
+    <div class="explain">
+      <p>Sin Git, para no perder trabajo terminás con archivos como <code>app-final.js</code>, <code>app-final-v2.js</code>, <code>app-final-AHORA-SI.js</code>. No sabés qué cambió entre una y otra, y si dos personas editan a la vez, alguien pisa el trabajo del otro.</p>
+      <p>Con Git trabajás siempre sobre los mismos archivos, y cuando llegás a un punto que te interesa guardar hacés un <b>commit</b>. Git recuerda todos los commits, así que podés:</p>
+      <ul>
+        <li><b>Ver el historial:</b> qué cambió, cuándo, quién y por qué (por el mensaje).</li>
+        <li><b>Volver atrás:</b> recuperar cómo estaba un archivo o todo el proyecto en cualquier commit.</li>
+        <li><b>Trabajar en paralelo:</b> con ramas, probar una idea sin romper la versión que funciona.</li>
+        <li><b>Colaborar:</b> varias personas trabajan en el mismo proyecto y Git une los cambios.</li>
+        <li><b>Tener respaldo:</b> si subís el repo a GitHub, tu trabajo queda también en internet.</li>
+      </ul>
+      <p>Git trabaja <b>en tu computadora</b>: no necesita internet para hacer commits ni ver el historial. Internet solo hace falta para compartir (push/pull).</p>
+    </div>
+  </section>
+
+  <!-- ================= ZONAS ================= -->
+  <section class="block" id="zonas">
+    <div class="section-head">
+      <div class="num">2</div>
+      <div class="titles"><h2>Las cuatro zonas: dónde está cada cambio</h2></div>
+    </div>
+    <div class="explain">
+      <p>Un cambio pasa por varias “zonas” antes de quedar guardado y compartido. Entender esto explica casi todos los comandos:</p>
+      <ol>
+        <li><b>Carpeta de trabajo:</b> editás un archivo. Git se da cuenta de que cambió, pero todavía no lo guardó.</li>
+        <li><b>Área de preparación:</b> con <code>git add</code> elegís qué cambios van a entrar en el próximo commit. Sirve para guardar solo una parte de lo que modificaste.</li>
+        <li><b>Repositorio local:</b> con <code>git commit</code> lo preparado se guarda en el historial, dentro de la carpeta <code>.git</code> de tu computadora.</li>
+        <li><b>Repositorio remoto:</b> con <code>git push</code> tus commits se suben a GitHub. Con <code>git pull</code> traés los de otras personas.</li>
+      </ol>
+    </div>
+    <div class="diagram">
+      <div class="svg-scroll">
+      <svg viewBox="0 0 1000 320" role="img" aria-label="Carpeta de trabajo, git add al área de preparación, git commit al repositorio local, git push al remoto; git pull trae del remoto a la carpeta de trabajo">
+        <rect x="20" y="70" width="210" height="120" rx="10" class="d-plain"/>
+        <text x="125" y="104" text-anchor="middle" class="d-title">Carpeta de trabajo</text>
+        <text x="125" y="130" text-anchor="middle" class="d-sub">tus archivos, como los</text>
+        <text x="125" y="148" text-anchor="middle" class="d-sub">ves en el editor</text>
+        <text x="125" y="174" text-anchor="middle" class="d-lbl">app.js modificado</text>
+
+        <rect x="270" y="70" width="210" height="120" rx="10" class="d-vol"/>
+        <text x="375" y="104" text-anchor="middle" class="d-title">Área de preparación</text>
+        <text x="375" y="130" text-anchor="middle" class="d-sub">lo que va a entrar en</text>
+        <text x="375" y="148" text-anchor="middle" class="d-sub">el próximo commit</text>
+        <text x="375" y="174" text-anchor="middle" class="d-lbl">staging / index</text>
+
+        <rect x="520" y="70" width="210" height="120" rx="10" class="d-ok"/>
+        <text x="625" y="104" text-anchor="middle" class="d-title">Repositorio local</text>
+        <text x="625" y="130" text-anchor="middle" class="d-sub">el historial de commits,</text>
+        <text x="625" y="148" text-anchor="middle" class="d-sub">en tu computadora</text>
+        <text x="625" y="174" text-anchor="middle" class="d-lbl">carpeta .git</text>
+
+        <rect x="770" y="70" width="210" height="120" rx="10" class="d-img"/>
+        <text x="875" y="104" text-anchor="middle" class="d-title">Repositorio remoto</text>
+        <text x="875" y="130" text-anchor="middle" class="d-sub">una copia en internet</text>
+        <text x="875" y="148" text-anchor="middle" class="d-sub">para compartir</text>
+        <text x="875" y="174" text-anchor="middle" class="d-lbl">GitHub · origin</text>
+
+        <path d="M230,110 L266,110" class="d-line" marker-end="url(#ah)"/>
+        <text x="248" y="58" text-anchor="middle" class="d-code" style="font-weight:700">git add</text>
+        <path d="M248,62 L248,104" class="d-line" style="stroke-dasharray:3 3"/>
+        <path d="M480,110 L516,110" class="d-line s-ok" marker-end="url(#ah-ok)"/>
+        <text x="498" y="58" text-anchor="middle" class="d-code" style="font-weight:700">git commit</text>
+        <path d="M498,62 L498,104" class="d-line" style="stroke-dasharray:3 3"/>
+        <path d="M730,110 L766,110" class="d-line s-img" marker-end="url(#ah-img)"/>
+        <text x="748" y="58" text-anchor="middle" class="d-code" style="font-weight:700">git push</text>
+        <path d="M748,62 L748,104" class="d-line" style="stroke-dasharray:3 3"/>
+
+        <path d="M875,190 C875,262 125,262 125,194" class="d-line s-img" style="stroke-dasharray:6 5" marker-end="url(#ah-img)"/>
+        <text x="500" y="280" text-anchor="middle" class="d-code" style="font-weight:700">git pull</text>
+        <text x="500" y="304" text-anchor="middle" class="d-sub">trae los commits del remoto y actualiza tus archivos</text>
+      </svg>
+      </div>
+      <div class="callout info"><span class="ico">i</span><p>¿Por qué existe el área de preparación? Porque a veces modificás varios archivos y querés guardarlos en commits separados (por ejemplo, “arreglo del login” y “cambio de colores”). Con <code>git add</code> elegís qué va en cada uno.</p></div>
+    </div>
+  </section>
+
+  <!-- ================= COMMITS ================= -->
+  <section class="block" id="commits">
+    <div class="section-head">
+      <div class="num">3</div>
+      <div class="titles"><h2>Commits e historial</h2></div>
+    </div>
+    <div class="explain">
+      <p>Cada commit guarda el estado completo del proyecto y apunta al commit anterior (su “padre”). Así se forma una cadena: el <b>historial</b>. Cada commit tiene un <b>hash</b> único, un <b>mensaje</b>, un <b>autor</b> y una <b>fecha</b>.</p>
+      <p>La rama <code>main</code> es simplemente un marcador que apunta al último commit de esa línea. <b>HEAD</b> te dice en qué rama estás. Cuando hacés un commit nuevo, la rama actual avanza sola hasta él.</p>
+    </div>
+    <div class="diagram">
+      <div class="svg-scroll">
+      <svg viewBox="0 0 1000 230" role="img" aria-label="Tres commits encadenados; la rama main apunta al último y HEAD apunta a main">
+        <circle cx="140" cy="120" r="34" class="d-ok"/>
+        <text x="140" y="125" text-anchor="middle" class="d-code" style="font-weight:700">a1f3</text>
+        <text x="140" y="184" text-anchor="middle" class="d-sub">“Primer commit”</text>
+
+        <circle cx="420" cy="120" r="34" class="d-ok"/>
+        <text x="420" y="125" text-anchor="middle" class="d-code" style="font-weight:700">7c2e</text>
+        <text x="420" y="184" text-anchor="middle" class="d-sub">“Agrega la ruta /crear”</text>
+
+        <circle cx="700" cy="120" r="34" class="d-ok"/>
+        <text x="700" y="125" text-anchor="middle" class="d-code" style="font-weight:700">3ddb</text>
+        <text x="700" y="184" text-anchor="middle" class="d-sub">“Corrige el puerto”</text>
+
+        <path d="M386,120 L178,120" class="d-line" marker-end="url(#ah)"/>
+        <path d="M666,120 L458,120" class="d-line" marker-end="url(#ah)"/>
+        <text x="280" y="110" text-anchor="middle" class="d-lbl">padre</text>
+        <text x="560" y="110" text-anchor="middle" class="d-lbl">padre</text>
+
+        <rect x="820" y="98" width="80" height="44" rx="8" class="d-vol"/>
+        <text x="860" y="125" text-anchor="middle" class="d-code" style="font-weight:700">main</text>
+        <path d="M820,120 L738,120" class="d-line s-vol" marker-end="url(#ah)"/>
+
+        <rect x="820" y="20" width="80" height="40" rx="8" class="d-plain"/>
+        <text x="860" y="45" text-anchor="middle" class="d-code" style="font-weight:700">HEAD</text>
+        <path d="M860,60 L860,94" class="d-line" marker-end="url(#ah)"/>
+        <text x="920" y="45" class="d-lbl">“estás acá”</text>
+
+        <text x="140" y="214" text-anchor="middle" class="d-lbl">más viejo</text>
+        <text x="700" y="214" text-anchor="middle" class="d-lbl">más nuevo</text>
+      </svg>
+      </div>
+      <div class="grid cols-2" style="margin-top:12px">
+        <div class="callout tip"><span class="ico">✓</span><p><b>Buenos commits:</b> chicos y con un solo propósito. El mensaje dice <i>qué</i> hace y, si no es obvio, <i>por qué</i>: “Corrige el puerto de la app en el Dockerfile”.</p></div>
+        <div class="callout info"><span class="ico">i</span><p>Los commits son <b>locales</b> hasta que hacés <code>git push</code>. Podés hacer muchos commits sin internet y subirlos todos juntos después.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= ESTADOS ================= -->
+  <section class="block" id="archivo">
+    <div class="section-head">
+      <div class="num">4</div>
+      <div class="titles"><h2>Los estados de un archivo</h2></div>
+    </div>
+    <div class="explain">
+      <p>Cuando corrés <code>git status</code>, Git te dice en qué estado está cada archivo. Son cuatro:</p>
+      <ul>
+        <li><b>Sin seguimiento</b> (<i>untracked</i>): un archivo nuevo que Git nunca guardó. Git lo ve, pero lo ignora hasta que hagas <code>git add</code>.</li>
+        <li><b>Preparado</b> (<i>staged</i>): agregado con <code>git add</code>; va a entrar en el próximo commit.</li>
+        <li><b>Sin cambios</b> (<i>unmodified</i>): igual que en el último commit. No aparece en <code>git status</code>.</li>
+        <li><b>Modificado</b> (<i>modified</i>): cambió desde el último commit, pero todavía no lo preparaste.</li>
+      </ul>
+    </div>
+    <div class="diagram">
+      <div class="svg-scroll">
+      <svg viewBox="0 0 1000 230" role="img" aria-label="Sin seguimiento pasa a preparado con git add; preparado a sin cambios con git commit; sin cambios a modificado al editar; modificado vuelve a preparado con git add">
+        <rect x="20" y="50" width="200" height="80" rx="10" class="d-plain"/>
+        <text x="120" y="84" text-anchor="middle" class="d-title">Sin seguimiento</text>
+        <text x="120" y="108" text-anchor="middle" class="d-lbl">untracked</text>
+
+        <rect x="275" y="50" width="200" height="80" rx="10" class="d-vol"/>
+        <text x="375" y="84" text-anchor="middle" class="d-title">Preparado</text>
+        <text x="375" y="108" text-anchor="middle" class="d-lbl">staged</text>
+
+        <rect x="530" y="50" width="200" height="80" rx="10" class="d-ok"/>
+        <text x="630" y="84" text-anchor="middle" class="d-title">Sin cambios</text>
+        <text x="630" y="108" text-anchor="middle" class="d-lbl">committed</text>
+
+        <rect x="785" y="50" width="195" height="80" rx="10" class="d-img"/>
+        <text x="882" y="84" text-anchor="middle" class="d-title">Modificado</text>
+        <text x="882" y="108" text-anchor="middle" class="d-lbl">modified</text>
+
+        <path d="M220,90 L271,90" class="d-line" marker-end="url(#ah)"/>
+        <text x="246" y="40" text-anchor="middle" class="d-code">git add</text>
+        <path d="M475,90 L526,90" class="d-line s-ok" marker-end="url(#ah-ok)"/>
+        <text x="500" y="40" text-anchor="middle" class="d-code">git commit</text>
+        <path d="M730,90 L781,90" class="d-line s-img" marker-end="url(#ah-img)"/>
+        <text x="756" y="40" text-anchor="middle" class="d-sub">editás</text>
+
+        <path d="M882,130 C882,200 375,200 375,134" class="d-line" style="stroke-dasharray:6 5" marker-end="url(#ah)"/>
+        <text x="628" y="196" text-anchor="middle" class="d-code">git add</text>
+        <text x="628" y="220" text-anchor="middle" class="d-sub">para incluir los cambios nuevos en el próximo commit</text>
+      </svg>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= RAMAS ================= -->
+  <section class="block" id="ramas">
+    <div class="section-head">
+      <div class="num">5</div>
+      <div class="titles"><h2>Ramas, en una idea</h2></div>
+    </div>
+    <div class="explain">
+      <p>Una <b>rama</b> te deja trabajar en algo nuevo sin tocar la versión que funciona. Creás una rama (por ejemplo <code>nueva-ruta</code>), hacés commits ahí, y cuando está lista la <b>unís</b> (<i>merge</i>) a <code>main</code>. Si la idea no sirvió, borrás la rama y <code>main</code> nunca se enteró.</p>
+      <p>Técnicamente, una rama es solo un marcador que apunta a un commit: crearla es instantáneo y no copia archivos. Todo el detalle está en <a href="04-ramas.html">Ramas</a>.</p>
+    </div>
+  </section>
+
+  <!-- ================= GITHUB ================= -->
+  <section class="block" id="github">
+    <div class="section-head">
+      <div class="num">6</div>
+      <div class="titles"><h2>Git y GitHub no son lo mismo</h2></div>
+    </div>
+    <div class="grid cols-2">
+      <div class="card">
+        <h3>Git</h3>
+        <ul>
+          <li>Es un <b>programa</b> que instalás en tu computadora.</li>
+          <li>Guarda el historial en la carpeta <code>.git</code> de cada proyecto.</li>
+          <li>Funciona sin internet y sin cuenta en ningún lado.</li>
+          <li>Se usa desde la terminal (o desde editores como VS Code, que lo usan por detrás).</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>GitHub</h3>
+        <ul>
+          <li>Es un <b>sitio web</b> (un servicio) que guarda repositorios Git en internet.</li>
+          <li>Sirve de respaldo y para compartir: otras personas clonan tu repo o te proponen cambios.</li>
+          <li>Agrega herramientas: <i>pull requests</i> (revisar cambios antes de unirlos), <i>issues</i> (tareas y errores), Actions (automatizaciones).</li>
+          <li>Alternativas: GitLab, Bitbucket, Azure DevOps. Los comandos de Git son los mismos.</li>
+        </ul>
+      </div>
+    </div>
+    <div class="callout tip"><span class="ico">✓</span><p>¿Listo para usarlo? Seguí <a href="02-primeros-pasos.html">Primeros pasos</a>: instalar, configurar, primer commit y subirlo a GitHub, paso a paso.</p></div>
+  </section>
+
+  <footer class="foot">
+    <a href="index.html">← Inicio</a>
+    <a href="02-primeros-pasos.html">Siguiente: Primeros pasos →</a>
+  </footer>
+</main>
+</body>
+</html>

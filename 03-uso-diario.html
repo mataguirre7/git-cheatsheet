@@ -1,0 +1,260 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Comandos de Git para el día a día explicados: status, add, commit, log, diff, show, mover y borrar archivos, stash y tags.">
+<meta name="theme-color" content="#bc4c00">
+<title>Git · Uso diario</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect x='4' y='4' width='56' height='56' rx='14' fill='%23bc4c00'/%3E%3Cg fill='none' stroke='%23fff' stroke-width='3.4' stroke-linecap='round'%3E%3Cpath d='M22 18v28'/%3E%3Cpath d='M22 30c0-6 20-4 20-12'/%3E%3C/g%3E%3Cg fill='%23fff'%3E%3Ccircle cx='22' cy='18' r='4.5'/%3E%3Ccircle cx='22' cy='46' r='4.5'/%3E%3Ccircle cx='42' cy='18' r='4.5'/%3E%3C/g%3E%3C/svg%3E">
+<link rel="stylesheet" href="assets/style.css">
+<script src="assets/app.js"></script>
+</head>
+<body data-page="diario">
+<header class="topbar"></header>
+
+<main class="wrap">
+
+  <div class="hero">
+    <span class="eyebrow">Git · 03</span>
+    <h1>Uso diario</h1>
+    <p class="lead">Los comandos que vas a usar casi todos los días, cada uno con qué hace, cuándo usarlo y qué esperar. Todos se ejecutan dentro de la carpeta del repositorio.</p>
+    <div class="toolbar">
+      <label class="search">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        <input id="q" type="search" placeholder="Buscar: historial, diferencias, guardar temporal, versión…" autocomplete="off" aria-label="Buscar comando">
+        <span class="hint"><kbd>/</kbd></span>
+      </label>
+    </div>
+    <nav class="toc">
+      <a href="#status">Ver el estado</a>
+      <a href="#add">Preparar</a>
+      <a href="#commit">Commitear</a>
+      <a href="#log">Historial</a>
+      <a href="#diff">Diferencias</a>
+      <a href="#archivos">Mover y borrar</a>
+      <a href="#stash">Guardar sin commitear</a>
+      <a href="#tags">Versiones (tags)</a>
+    </nav>
+  </div>
+
+  <section class="terms-box">
+    <h2>Términos de esta página</h2>
+    <p>Las ideas base (commit, área de preparación, HEAD) están en <a href="01-conceptos.html">Conceptos</a>.</p>
+    <dl class="terms">
+      <dt>Diff</dt><dd>La diferencia entre dos versiones de un archivo: qué líneas se agregaron (<code>+</code>) y cuáles se quitaron (<code>-</code>).</dd>
+      <dt>Log</dt><dd>El historial de commits.</dd>
+      <dt>Flag (opción)</dt><dd>Lo que va después del comando con uno o dos guiones y cambia su comportamiento, por ejemplo <code>--oneline</code> o <code>-m</code>.</dd>
+      <dt>Stash</dt><dd>Un cajón donde guardar cambios sin commitear para dejar la carpeta limpia un rato y recuperarlos después.</dd>
+      <dt>Tag</dt><dd>Una etiqueta con nombre fijo para un commit importante, típicamente una versión: <code>v1.0.0</code>.</dd>
+      <dt>Rastreado (tracked)</dt><dd>Un archivo que Git ya conoce porque estuvo en algún commit. Los nuevos no lo están hasta el primer <code>git add</code>.</dd>
+      <dt>Paginador</dt><dd>Cuando la salida es larga (por ejemplo en <code>git log</code>), Git la muestra por páginas: <kbd>Espacio</kbd> avanza y <kbd>q</kbd> sale.</dd>
+    </dl>
+  </section>
+
+  <!-- ================= STATUS ================= -->
+  <section class="block" id="status" data-search>
+    <div class="section-head">
+      <div class="num">1</div>
+      <div class="titles"><h2>Ver el estado</h2><p>Correlo cada vez que dudes. No cambia nada.</p></div>
+    </div>
+    <div class="grid cols-2">
+      <div class="card">
+        <h3>git status</h3>
+        <div class="cmd"><pre><code>git status</code></pre><div class="what">Dice la rama actual, si estás adelante o atrás del remoto, y qué archivos están <b>preparados</b>, <b>modificados</b> o <b>sin seguimiento</b>.</div></div>
+        <pre class="out"><code data-lang="plain">On branch main
+Your branch is up to date with 'origin/main'.
+
+Changes to be committed:
+        modified:   README.md
+
+Changes not staged for commit:
+        modified:   app.js
+
+Untracked files:
+        notas.txt</code></pre>
+      </div>
+      <div class="card">
+        <h3>Cómo leer la salida</h3>
+        <ul>
+          <li><b>Changes to be committed:</b> preparado con <code>git add</code>; entra en el próximo commit.</li>
+          <li><b>Changes not staged for commit:</b> modificado pero no preparado; si hacés commit ahora, <b>no</b> entra.</li>
+          <li><b>Untracked files:</b> archivos nuevos que Git todavía no sigue.</li>
+          <li><b>up to date with 'origin/main':</b> tu rama tiene los mismos commits que la de GitHub (según lo último que Git sabe).</li>
+        </ul>
+        <div class="cmd"><pre><code>git status -s</code></pre><div class="what">Versión corta: <code>M</code> modificado, <code>A</code> agregado, <code>??</code> sin seguimiento. La columna de la izquierda es lo preparado y la de la derecha lo no preparado.</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= ADD ================= -->
+  <section class="block" id="add" data-search>
+    <div class="section-head">
+      <div class="num">2</div>
+      <div class="titles"><h2>Preparar cambios (git add)</h2><p>Elegir qué va a entrar en el próximo commit.</p></div>
+    </div>
+    <div class="card">
+      <div class="cmd"><pre><code>git add app.js</code></pre><div class="what">Prepara un archivo puntual.</div></div>
+      <div class="cmd"><pre><code>git add .</code></pre><div class="what">Prepara <b>todo</b> lo que cambió en la carpeta actual y sus subcarpetas (respetando el <code>.gitignore</code>). Mirá <code>git status</code> antes para no incluir algo de más.</div></div>
+      <div class="cmd"><pre><code>git add src/</code></pre><div class="what">Prepara todo lo de una carpeta.</div></div>
+      <div class="cmd"><pre><code>git add -p</code></pre><div class="what">Modo interactivo: te muestra cada bloque de cambios y preguntás uno por uno (<code>y</code> = sí, <code>n</code> = no, <code>q</code> = salir). Sirve para dividir un archivo con dos cambios distintos en dos commits.</div></div>
+      <div class="cmd"><pre><code>git restore --staged app.js</code></pre><div class="what">Lo contrario de <code>add</code>: saca el archivo del área de preparación. <b>No</b> pierde tus cambios; solo dejan de estar preparados.</div></div>
+    </div>
+  </section>
+
+  <!-- ================= COMMIT ================= -->
+  <section class="block" id="commit" data-search>
+    <div class="section-head">
+      <div class="num">3</div>
+      <div class="titles"><h2>Guardar un commit</h2></div>
+    </div>
+    <div class="grid cols-2">
+      <div class="card">
+        <h3>Formas de commitear</h3>
+        <div class="cmd"><pre><code>git commit -m "Agrega la ruta /health"</code></pre><div class="what">Guarda lo preparado con ese mensaje.</div></div>
+        <div class="cmd"><pre><code>git commit</code></pre><div class="what">Sin <code>-m</code>, Git abre el editor configurado para que escribas un mensaje largo. Primera línea = título; línea vacía; después el detalle. Guardá y cerrá el editor para terminar.</div></div>
+        <div class="cmd"><pre><code>git commit -am "Corrige el puerto"</code></pre><div class="what"><code>-a</code> prepara automáticamente los archivos <b>ya rastreados</b> que cambiaron y commitea en un paso. Los archivos nuevos no entran: esos necesitan <code>git add</code>.</div></div>
+        <div class="cmd"><pre><code>git commit --amend -m "Mensaje corregido"</code></pre><div class="what">Reemplaza el <b>último</b> commit (para corregir el mensaje o sumar un archivo olvidado). Usalo solo si todavía no hiciste <code>push</code> de ese commit.</div></div>
+      </div>
+      <div class="card">
+        <h3>Cómo escribir buenos mensajes</h3>
+        <ul>
+          <li>En imperativo y concreto: “Agrega validación del email”, no “cambios” ni “arreglos varios”.</li>
+          <li>Primera línea corta (hasta ~70 caracteres): es lo que se ve en <code>git log --oneline</code> y en GitHub.</li>
+          <li>Si el porqué no es obvio, explicalo en el cuerpo del mensaje.</li>
+          <li>Un commit = una idea. Si en el mensaje necesitás “y además…”, probablemente son dos commits.</li>
+        </ul>
+        <pre><code data-lang="plain">Agrega healthcheck a la API
+
+Kubernetes necesita una ruta que responda 200
+para saber si el Pod está listo para recibir tráfico.</code></pre>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= LOG ================= -->
+  <section class="block" id="log" data-search>
+    <div class="section-head">
+      <div class="num">4</div>
+      <div class="titles"><h2>Ver el historial (git log)</h2><p>Si la salida es larga, se abre un paginador: <kbd>Espacio</kbd> avanza, <kbd>q</kbd> sale.</p></div>
+    </div>
+    <div class="grid cols-2">
+      <div class="card">
+        <h3>Variantes útiles</h3>
+        <div class="cmd"><pre><code>git log --oneline</code></pre><div class="what">Un commit por línea: hash corto y título.</div></div>
+        <pre class="out"><code data-lang="plain">3ddb522 (HEAD -&gt; main, origin/main) Desactiva ligaduras en los chips
+71fc95b Update README.md
+279f465 first commit</code></pre>
+        <div class="explain"><p><code>HEAD -&gt; main</code>: estás en <code>main</code>. <code>origin/main</code>: hasta dónde llega la rama en GitHub (según el último <code>fetch</code>/<code>pull</code>).</p></div>
+        <div class="cmd"><pre><code>git log --oneline --graph --all</code></pre><div class="what">Dibuja las ramas con líneas: ideal para entender cómo se separan y se unen.</div></div>
+        <div class="cmd"><pre><code>git log -5</code></pre><div class="what">Solo los últimos 5 commits, con autor, fecha y mensaje completo.</div></div>
+      </div>
+      <div class="card">
+        <h3>Buscar en el historial</h3>
+        <div class="cmd"><pre><code>git log --oneline -- app.js</code></pre><div class="what">Solo los commits que tocaron ese archivo. El <code>--</code> separa opciones de nombres de archivo.</div></div>
+        <div class="cmd"><pre><code>git log --stat</code></pre><div class="what">Además, qué archivos cambió cada commit y cuántas líneas.</div></div>
+        <div class="cmd"><pre><code>git log --author="&lt;nombre&gt;" --since="2 weeks ago"</code></pre><div class="what">Filtrar por autor y fecha.</div></div>
+        <div class="cmd"><pre><code>git log --grep="puerto"</code></pre><div class="what">Commits cuyo mensaje contiene esa palabra.</div></div>
+        <div class="cmd"><pre><code>git show 3ddb522</code></pre><div class="what">Todo sobre un commit: autor, fecha, mensaje y el diff completo.</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= DIFF ================= -->
+  <section class="block" id="diff" data-search>
+    <div class="section-head">
+      <div class="num">5</div>
+      <div class="titles"><h2>Ver diferencias (git diff)</h2><p>Qué líneas cambiaron exactamente.</p></div>
+    </div>
+    <div class="grid cols-2">
+      <div class="card">
+        <h3>Qué compara cada variante</h3>
+        <div class="cmd"><pre><code>git diff</code></pre><div class="what">Cambios <b>no preparados</b>: carpeta de trabajo contra el área de preparación.</div></div>
+        <div class="cmd"><pre><code>git diff --staged</code></pre><div class="what">Cambios <b>preparados</b>: lo que va a entrar en el próximo commit. Ideal para revisar antes de commitear.</div></div>
+        <div class="cmd"><pre><code>git diff HEAD</code></pre><div class="what">Todo lo que cambió desde el último commit, preparado o no.</div></div>
+        <div class="cmd"><pre><code>git diff main..nueva-ruta</code></pre><div class="what">Diferencias entre dos ramas.</div></div>
+        <div class="cmd"><pre><code>git diff --stat</code></pre><div class="what">Solo el resumen: archivos y cantidad de líneas.</div></div>
+      </div>
+      <div class="card">
+        <h3>Cómo leer un diff</h3>
+        <pre class="out"><code data-lang="plain">diff --git a/app.js b/app.js
+@@ -3,7 +3,7 @@ import mongoose from "mongoose";
+-const PORT = 3000;
++const PORT = process.env.PORT ?? 3000;</code></pre>
+        <ul>
+          <li><code>a/</code> es la versión vieja y <code>b/</code> la nueva.</li>
+          <li><code>@@ -3,7 +3,7 @@</code>: el bloque empieza en la línea 3 (en las dos versiones) y abarca 7 líneas.</li>
+          <li>Línea con <code>-</code>: se quitó. Con <code>+</code>: se agregó. Una línea modificada aparece como un <code>-</code> seguido de un <code>+</code>.</li>
+        </ul>
+        <div class="callout tip"><span class="ico">✓</span><p>En VS Code, el panel <b>Control de código fuente</b> muestra los mismos diffs lado a lado, con colores.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= ARCHIVOS ================= -->
+  <section class="block" id="archivos" data-search>
+    <div class="section-head">
+      <div class="num">6</div>
+      <div class="titles"><h2>Mover, renombrar y borrar archivos</h2></div>
+    </div>
+    <div class="card">
+      <div class="cmd"><pre><code>git mv viejo.js nuevo.js</code></pre><div class="what">Renombra o mueve y deja el cambio preparado. (Si lo renombrás desde el editor, Git lo detecta igual como renombre al hacer <code>git add</code>.)</div></div>
+      <div class="cmd"><pre><code>git rm archivo.txt</code></pre><div class="what">Borra el archivo del disco y prepara el borrado para el próximo commit.</div></div>
+      <div class="cmd"><pre><code>git rm --cached .env</code></pre><div class="what">Deja de rastrear el archivo <b>sin borrarlo</b> de tu disco. Se usa cuando subiste algo que debía estar en el <code>.gitignore</code>: después agregalo al <code>.gitignore</code> y commiteá.</div></div>
+    </div>
+  </section>
+
+  <!-- ================= STASH ================= -->
+  <section class="block" id="stash" data-search>
+    <div class="section-head">
+      <div class="num">7</div>
+      <div class="titles"><h2>Guardar cambios sin commitear (git stash)</h2></div>
+    </div>
+    <div class="explain">
+      <p>Situación típica: estás a mitad de algo, no querés commitear todavía, y necesitás cambiar de rama o hacer <code>git pull</code>. <code>git stash</code> guarda tus cambios en un “cajón”, deja la carpeta como en el último commit, y después los devolvés.</p>
+    </div>
+    <div class="grid cols-2">
+      <div class="card">
+        <h3>Guardar y recuperar</h3>
+        <div class="cmd"><pre><code>git stash push -m "mitad del formulario"</code></pre><div class="what">Guarda los cambios de archivos rastreados con un nombre. Con <code>-u</code> incluye también los archivos nuevos.</div></div>
+        <div class="cmd"><pre><code>git stash list</code></pre><div class="what">Lo que hay en el cajón: <code>stash@{0}</code> es el más reciente.</div></div>
+        <div class="cmd"><pre><code>git stash pop</code></pre><div class="what">Devuelve el último guardado a la carpeta y lo saca del cajón.</div></div>
+      </div>
+      <div class="card">
+        <h3>Más opciones</h3>
+        <div class="cmd"><pre><code>git stash apply stash@{1}</code></pre><div class="what">Devuelve uno puntual pero lo deja en el cajón (sirve para aplicarlo en varias ramas).</div></div>
+        <div class="cmd"><pre><code>git stash drop stash@{1}</code></pre><div class="what">Borra uno del cajón.</div></div>
+        <div class="callout warn"><span class="ico">!</span><p>El stash es local y temporal: no se sube a GitHub. Para algo que dure, mejor un commit en una rama.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= TAGS ================= -->
+  <section class="block" id="tags" data-search>
+    <div class="section-head">
+      <div class="num">8</div>
+      <div class="titles"><h2>Marcar versiones (git tag)</h2></div>
+    </div>
+    <div class="explain"><p>Un <b>tag</b> es un nombre fijo para un commit, normalmente una versión publicada. A diferencia de una rama, no avanza: <code>v1.0.0</code> apunta siempre al mismo commit. Es útil para saber exactamente qué código corresponde a una versión (por ejemplo, la imagen Docker <code>chanchito:1.0.0</code>).</p></div>
+    <div class="grid cols-2">
+      <div class="card">
+        <div class="cmd"><pre><code>git tag -a v1.0.0 -m "Primera versión estable"</code></pre><div class="what">Crea un tag “anotado” (con autor, fecha y mensaje) en el commit actual. Es el tipo recomendado.</div></div>
+        <div class="cmd"><pre><code>git tag</code></pre><div class="what">Lista los tags.</div></div>
+        <div class="cmd"><pre><code>git show v1.0.0</code></pre><div class="what">Qué commit marca y su contenido.</div></div>
+      </div>
+      <div class="card">
+        <div class="cmd"><pre><code>git push origin v1.0.0</code></pre><div class="what">Los tags <b>no</b> se suben con <code>git push</code> normal: hay que subirlos explícitamente (o todos con <code>git push --tags</code>).</div></div>
+        <div class="cmd"><pre><code>git switch --detach v1.0.0</code></pre><div class="what">Ver el proyecto tal como estaba en esa versión (sin rama: modo “detached HEAD”, ver <a href="07-problemas.html">Problemas</a>). Para volver: <code>git switch main</code>.</div></div>
+      </div>
+    </div>
+  </section>
+
+  <p class="empty">No hay comandos que coincidan con la búsqueda.</p>
+
+  <footer class="foot">
+    <a href="02-primeros-pasos.html">← Primeros pasos</a>
+    <a href="04-ramas.html">Siguiente: Ramas →</a>
+  </footer>
+</main>
+</body>
+</html>
